@@ -1,5 +1,4 @@
-#include <cuda.h>
-#include <bits/stdc++.h>
+#include "GoL_backend.h"
 
 __global__ void k1(int* curr_state_device,int m,int n,int* temporary_arr_for_device)
 {
