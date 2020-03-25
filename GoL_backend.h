@@ -1,6 +1,10 @@
 #include <bits/stdc++.h>
 #include <cuda.h>
 
+//cuda kernels needed as a part of computing the next state of the grid from the gpu
+__global__ void k1(int* curr_state_device,int m,int n,int* temporary_arr_for_device);
+__global__ void k2(int* curr_state_device,int m,int n,int* temporary_arr_for_device);
+
 //class that contains all the necessary software implementations of game of life
 class GoL
 {
