@@ -35,9 +35,12 @@ class GoL
     //constructor to initialize the size of the grid and computation type of the object
 		GoL(int _m,int _n,bool ifCpuOrGpu);
 	
-    //function to get the initial state as a host input pointer, and update the state variables of the class
+    //function to get the initial state as a host input pointer, configuration of the grid, whether computation should be performed on the CPU or GPU, and update the state variables of the class
 		void setInitialState(int m,int n,bool ifCpuOrGpu,int* arr);
     
+	//function to get inputs from a file, whose filename is given as a string parameter to the function
+		bool getInitialState(string filename);
+	
     //function to compute the next state of the grid on the cpu using the host pointer state of the class, and update it 
 		void change_of_state_cpu();
     
