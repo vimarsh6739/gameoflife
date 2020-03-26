@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <fstream>
 #include <cuda.h>
 
 //cuda kernels needed as a part of computing the next state of the grid from the gpu
