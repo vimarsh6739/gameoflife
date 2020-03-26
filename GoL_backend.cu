@@ -160,3 +160,18 @@ void GoL::change_of_state_cpu()
 		}
 	}
 }
+
+int* GoL::getStateGPU()
+{
+	return curr_state_device;
+}
+
+int* GoL::getStateCPU()
+{
+	return curr_state_host;
+}
+
+bool GoL::getIfCpuOrGpu()
+{
+	return cpuorgpu;
+}
