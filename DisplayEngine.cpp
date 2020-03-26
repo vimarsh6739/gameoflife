@@ -47,12 +47,12 @@ void DisplayEngine::displayWindow(){
 	glClear(GL_COLOR_BUFFER_BIT);
 	glLoadIdentity();
 	
-	if(this->useGPU){
-		updateStateCPU();
+	if(game_object.getIfCpuOrGpu()==false){
+		game_object.change_of_state_cpu();
 		renderImageCPU();
 	}
 	else{
-		updateStateCUDA();
+		game_object.change_of_state_gpu();
 		renderImageCUDA();
 	}
 	
@@ -92,7 +92,7 @@ void DisplayEngine::refreshWindow(int _t){
 void DisplayEngine::start(){
 	
 	//Initialize data
-	this->initializeInputs();
+	game_object.getInitialState("input");
 	
 	//Create a window
 	glutCreateWindow("Conway's Game of Life");
