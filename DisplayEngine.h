@@ -21,6 +21,9 @@
 #include <string>
 #include <cmath>
 
+//including the game class header
+#include "GoL_backend.h"
+
 //Add more headers here
 
 
@@ -45,6 +48,8 @@ private:
 	
 	//Define more member variables here
 	
+	GoL game_object;//object of the game class that contains the state variables and the update and initialization functions
+	
 public:
 	
 	DisplayEngine();
@@ -60,13 +65,9 @@ public:
 	static void mouseClickCallback(int button, int state, int _x, int _y);
 	static void keyboardInput(unsigned char _c, int _x, int _y);
 	
-	void initializeInputs();
 	void start();
 	void displayWindow();
 	void reshapeWindow(int _w, int _h);
-	
-	void updateStateCPU();
-	void updateStateCUDA();
 	
 	void renderImageCPU();
 	void renderImageCUDA();

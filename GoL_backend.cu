@@ -69,9 +69,12 @@ GoL::GoL(int _m,int _n,bool ifCpuOrGpu)
 	cpuorgpu=ifCpuOrGpu;
 }
 
-void GoL::setInitialState(int* arr)
+void GoL::setInitialState(int _m,int _n,bool isCpuOrGpu,int* arr)
 {
 	//copy the input parameter pointer to the host pointer
+	m=_m;
+	n=_n;
+	cpuorgpu=ifCpuOrGpu;
 	for(int i=0;i<m;++i)
 	{
 		for(int j=0;j<n;++j)
@@ -81,6 +84,26 @@ void GoL::setInitialState(int* arr)
 	}
 	//copy the host pointer to the device pointer
 	copyHostToDevice();
+}
+
+bool GoL::getInitialState(string filename)
+{
+	std::ifstream file(filename);
+	if(!(file.is_open()))
+		return false;
+	int _m,_n;
+	bool isCpuOrGpu;
+	int* arr;
+	file>>_m>>_n;
+	file>>isCpuOrGpu;
+	arr=(int*)malloc(m*n*sizeof(int));
+	for(int i=0;i<_m;++i)
+		for(int j=0;j<_n;++j)
+			file>>arr[i*_n+j];
+	setInitialState(_m,_n,isGpuOrCpu,arr);
+	file.close();
+	free(arr);
+	return true;
 }
 
 void GoL::change_of_state_gpu()
@@ -156,4 +179,19 @@ void GoL::change_of_state_cpu()
 			curr_state_host[i*n+j]=temp[i][j];
 		}
 	}
+}
+
+int* GoL::getStateGPU()
+{
+	return curr_state_device;
+}
+
+int* GoL::getStateCPU()
+{
+	return curr_state_host;
+}
+
+bool GoL::getIfCpuOrGpu()
+{
+	return cpuorgpu;
 }
