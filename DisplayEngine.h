@@ -48,7 +48,7 @@ private:
 	
 	//Define more member variables here
 	
-	GoL_backend game_object;//object of the game class that contains the state variables and the update and initialization functions
+	GoL game_object;//object of the game class that contains the state variables and the update and initialization functions
 	
 public:
 	
