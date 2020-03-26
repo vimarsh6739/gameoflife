@@ -43,5 +43,12 @@ class GoL
     
     //function to compute the next state of the grid on the gpu using the device pointer state of the class, and update it using a temporary device pointer
 		void change_of_state_gpu();
+	
+	//function to return the state pointer of the game on the gpu
+		int* getStateGPU();
+	
+	//function to return the state pointer of the game on the cpu
+		int* getStateCPU();
 		
 };
+	
