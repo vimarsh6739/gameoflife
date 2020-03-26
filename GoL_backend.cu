@@ -69,9 +69,12 @@ GoL::GoL(int _m,int _n,bool ifCpuOrGpu)
 	cpuorgpu=ifCpuOrGpu;
 }
 
-void GoL::setInitialState(int* arr)
+void GoL::setInitialState(int _m,int _n,bool isCpuOrGpu,int* arr)
 {
 	//copy the input parameter pointer to the host pointer
+	m=_m;
+	n=_n;
+	cpuorgpu=ifCpuOrGpu;
 	for(int i=0;i<m;++i)
 	{
 		for(int j=0;j<n;++j)
