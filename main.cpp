@@ -1,9 +1,11 @@
 
-#include <GL/glut.h>
+#include "DisplayEngine.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]){
 	
-	DisplayEngine e(argc,argv);
-	e.start();
+	//Create instance 
+	DisplayEngine* e = new DisplayEngine(argc,argv);
+	//Start simulation
+	e->start();
 	return 0;
 }

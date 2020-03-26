@@ -1,70 +1,108 @@
 #include "DisplayEngine.h"
 
-
 DisplayEngine::DisplayEngine(){
-	//To be filled later
+	//Safety decl
+	game = this;
+	width = 512;
+	height = 512;
+	fps = 60;
+	// glutInit(1,"default");
 }
 
-void DisplayEngine::init(){
-	//Set background as black
+DisplayEngine::DisplayEngine(int argc, char* argv[]){
+	//Init parameters
+	game = this;
+	width = 512;
+	height = 512;
+	fps = 60;
+	//Initialize glut window
+	glutInit(&argc,argv);
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+	glutInitWindowPosition(80,80);
+}
+
+void DisplayEngine::initializeWindow(){
+	//Set black background color
 	glClearColor(0,0,0,1);
 }
 
-void DisplayEngine::reshape(int w, int h){
+//static fn.
+void DisplayEngine::displayWindowCallback(){
+	game->displayWindow();
+}
 
-	//Set the viewing area from (0,0) with width w 
-	//and height h
-	glViewport(0,0,(GLsizei)w,(GLsizei)h);
+//static fn.
+void DisplayEngine::reshapeWindowCallback(int _w, int _h){
+	game->reshapeWindow(_w, _h);
+}
+
+//static fn.
+void DisplayEngine::refreshWindowCallback(int _t){
+	game->refreshWindow(_t);
+}
+
+//actually display
+void DisplayEngine::displayWindow(){
+	
+	glClear(GL_COLOR_BUFFER_BIT);
+	glLoadIdentity();
+	
+	if(this->useGPU){
+		updateStateCPU();
+		renderImageCPU();
+	}
+	else{
+		updateStateCUDA();
+		renderImageCUDA();
+	}
+	
+	//Actually post
+    glutSwapBuffers();
+	glutPostRedisplay();
+
+}
+
+void DisplayEngine::reshapeWindow(int _w, int _h){
+	
+	this->width = _w;
+	this->height = _h;
+	
+	//Set the viewing area from (0,0) with width w and height h
+	glViewport(0,0,(GLsizei)_w,(GLsizei)_h);
 	
 	//Generate a new matrix 
 	glMatrixMode(GL_PROJECTION_MATRIX);
 	glLoadIdentity();
 
 	//Faster than gluOrtho2d
-	gluPerspective(45,(double)w/h,0.1,10);
+	gluPerspective(60,(double)_w/_h,0.1,10);
 
 	//Switch back to model view
 	glMatrixMode(GL_MODELVIEW);
-	glutPostRedisplay();
+	glutPostRedisplay();	
+	
 }
 
-void DisplayEngine::display(){
-	
-	glClear(GL_COLOR_BUFFER_BIT);
-	glLoadIdentity();
-	
-	//Draw a triangle for now :P
-	glBegin(GL_TRIANGLES);
-    glColor3f( 1, 1, 1 ); // red
-    glVertex2f( -0.8, -0.8 );
-    glColor3f( 1, 1, 1 ); // green
-    glVertex2f( 0.8, -0.8 );
-    glColor3f( 1, 1, 1 ); // blue
-    glVertex2f( 0, 0.9 );
-    glEnd(); 
-	// draw2d();
-
-    //Swap animation buffers
-    glutSwapBuffers();
-    //Display again
+//Refresh window at given fps
+void DisplayEngine::refreshWindow(int _t){
 	glutPostRedisplay();
+	glutTimerFunc(1000/fps,DisplayEngine::refreshWindowCallback,0);
 }
 
 void DisplayEngine::start(){
-
-	//Initialize env with argc and argv
-	glutInit(&argc,argv);
-	//Color display with double buffer for smooth anim
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-
-	glutInitWindowPosition(80,80);
-	glutCreateWindow("Conway's Game of Life");
 	
-	glutReshapeFunc(DisplayEngine::reshape);
-  	glutDisplayFunc(DisplayEngine::display);
-  	init();//Initialize display params
+	//Initialize data
+	this->initializeInputs();
+	
+	//Create a window
+	glutCreateWindow("Conway's Game of Life");
+	glutDisplayFunc(DisplayEngine::displayWindowCallback);
+	glutReshapeFunc(DisplayEngine::reshapeWindowCallback);
+	initializeWindow();
+	// glutTimerFunc(50, DisplayEngine::refreshWindowCallback, 0);
 
-  	glutMainLoop();
+	glutMainLoop();
 }
+
 
 
