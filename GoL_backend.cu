@@ -86,6 +86,26 @@ void GoL::setInitialState(int _m,int _n,bool isCpuOrGpu,int* arr)
 	copyHostToDevice();
 }
 
+bool GoL::getInitialState(string filename)
+{
+	std::ifstream file(filename);
+	if(!(file.is_open()))
+		return false;
+	int _m,_n;
+	bool isCpuOrGpu;
+	int* arr;
+	file>>_m>>_n;
+	file>>isCpuOrGpu;
+	arr=(int*)malloc(m*n*sizeof(int));
+	for(int i=0;i<_m;++i)
+		for(int j=0;j<_n;++j)
+			file>>arr[i*_n+j];
+	setInitialState(_m,_n,isGpuOrCpu,arr);
+	file.close();
+	free(arr);
+	return true;
+}
+
 void GoL::change_of_state_gpu()
 {
 	//terminate if the object is not allowed to call the gpu function
