@@ -36,7 +36,7 @@ class GoL
 		GoL(int _m,int _n,bool ifCpuOrGpu);
 	
     //function to get the initial state as a host input pointer, and update the state variables of the class
-		void setInitialState(int* arr);
+		void setInitialState(int m,int n,bool ifCpuOrGpu,int* arr);
     
     //function to compute the next state of the grid on the cpu using the host pointer state of the class, and update it 
 		void change_of_state_cpu();
