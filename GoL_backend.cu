@@ -195,3 +195,18 @@ bool GoL::getIfCpuOrGpu()
 {
 	return cpuorgpu;
 }
+
+void GoL::switchComputation(bool switchTo)
+{
+	if(switchTo==cpuorgpu)
+		return;
+	cpuorgpu=switchTo;
+	if(cpuorgpu)
+	{
+		copyHostToDevice();
+	}
+	else
+	{
+		copyDeviceToHost();
+	}
+}
