@@ -49,6 +49,9 @@ class GoL
 	
 	//function to return the state pointer of the game on the cpu
 		int* getStateCPU();
+	
+	//function to return if the computations are to be performed on the cpu (false) or gpu (true)
+		bool getIfCpuOrGpu();
 		
 };
 	
