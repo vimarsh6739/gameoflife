@@ -21,12 +21,9 @@
 #include <string>
 #include <cmath>
 
-<<<<<<< Updated upstream
-=======
 //including the game class header
 #include "CPU_gol.h"
 
->>>>>>> Stashed changes
 //Add more headers here
 
 
@@ -49,12 +46,9 @@ private:
 	
 	bool useGPU; //flag to parallelize state computations using GPU
 	
-<<<<<<< Updated upstream
 	//Define more member variables here
-=======
 	//object of the game class that contains the state variables and the update and initialization functions
 	CPU_gol* game_object;
->>>>>>> Stashed changes
 	
 public:
 	
@@ -71,12 +65,7 @@ public:
 	static void mouseClickCallback(int button, int state, int _x, int _y);
 	static void keyboardInput(unsigned char _c, int _x, int _y);
 	
-<<<<<<< Updated upstream
-	void initializeInputs();
-	void start();
-=======
 	void initParams();
->>>>>>> Stashed changes
 	void displayWindow();
 	void reshapeWindow(int _w, int _h);
 	void refreshWindow(int _t);

@@ -22,11 +22,11 @@ DisplayEngine::DisplayEngine(int argc, char* argv[]){
 	width = 1000;
 	height = 1000;
 	
-	rows = 1000;
-	columns = 1000;
+	rows = 10;
+	columns = 50;
 	n_cells = rows * columns;
 	
-	fps = 60;
+	fps = 10;
 
 	glutInit(&argc,argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
@@ -65,17 +65,11 @@ void DisplayEngine::initParams(){
 void DisplayEngine::displayWindow(){
 	
 	glClear(GL_COLOR_BUFFER_BIT);
-<<<<<<< Updated upstream
-	glLoadIdentity();
-	
-	if(this->useGPU){
-		updateStateCPU();
-=======
+
 	// glLoadIdentity();
 	// std::cout<<"In display window::"<<"\n";
 	/*if(game_object.getIfCpuOrGpu()==false){
 		game_object.change_of_state_cpu();
->>>>>>> Stashed changes
 		renderImageCPU();
 	}
 	else{
@@ -146,17 +140,10 @@ void DisplayEngine::drawCell(int x, int y){
 void DisplayEngine::start(){
 	
 	//Initialize data
-<<<<<<< Updated upstream
-	this->initializeInputs();
-	
-	//Create a window
-	glutCreateWindow("Conway's Game of Life");
-=======
 	// game_object.getInitialState("input");
 	// game = this;
 
-	glutCreateWindow("Bouncy Blobby Bob");
->>>>>>> Stashed changes
+	glutCreateWindow("Conway's Game of Life");
 	glutDisplayFunc(DisplayEngine::displayWindowCallback);
 	glutReshapeFunc(DisplayEngine::reshapeWindowCallback);
 	initParams();
