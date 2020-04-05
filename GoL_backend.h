@@ -30,6 +30,9 @@ class GoL
 
     //copies the device array pointer to the host array pointer
 		void copyDeviceToHost();
+
+	//iteration number of the current state
+		int iteration_number;
 	
 	public:	
 
@@ -38,6 +41,12 @@ class GoL
 	
     //function to get the initial state as a host input pointer, configuration of the grid, whether computation should be performed on the CPU or GPU, and update the state variables of the class
 		void setInitialState(int m,int n,bool ifCpuOrGpu,int* arr);
+	
+	//function to set a random initial state to both the host and the device pointers
+		void randInitialState();
+	
+	//function to return true if a cell in the given position is alive and false if it isn't
+		bool isAlive(int i,int j);
     
 	//function to get inputs from a file, whose filename is given as a string parameter to the function
 		bool getInitialState(string filename);
@@ -59,6 +68,9 @@ class GoL
 	
 	//function to switch computation device from cpu (false) to gpu(true) or vice versa
 		void switchComputation(bool switchTo);
+	
+	//function to print all the cells of the current state
+		void printCells();
 		
 };
 	
