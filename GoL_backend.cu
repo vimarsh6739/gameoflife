@@ -61,12 +61,22 @@ void GoL::copyDeviceToHost()
 
 GoL::GoL(int _m,int _n,bool ifCpuOrGpu)
 {
+	srand(time(NULL));
 	m=_m;
 	n=_n;
 	cudaMalloc(&curr_state_device,m*n*sizeof(int));
 	cudaMalloc(&temporary_arr_for_device,m*n*sizeof(int));
 	curr_state_host=(int*)malloc(m*n*sizeof(int));
 	cpuorgpu=ifCpuOrGpu;
+	iteration_number=0;
+}
+
+void GoL::randInitialState()
+{
+	for(int i=0;i<m;++i)
+		for(int j=0;j<n;++j)
+			curr_state_host[i*n+j]=(rand()%2);
+	copyHostToDevice();
 }
 
 void GoL::setInitialState(int _m,int _n,bool isCpuOrGpu,int* arr)
@@ -179,6 +189,40 @@ void GoL::change_of_state_cpu()
 			curr_state_host[i*n+j]=temp[i][j];
 		}
 	}
+}
+
+void GoL::change_of_state()
+{
+	iteration_number++;
+	if(iteration_number==1)
+		return;
+	if(cpuorgpu)
+		change_of_state_gpu();
+	else
+		change_of_state_cpu();
+}
+
+bool GoL::isAlive(int i,int j)
+{
+	if(cpuorgpu)
+	{
+		cudaMemcpy((curr_state_host+(i*n+j)),(curr_state_device+(i*n+j)),sizeof(int),cudaMemcpyDeviceToHost);	
+	}
+	return (curr_state_host[i*n+j]==1);
+}
+
+void GoL::printCells()
+{
+	if(cpuorgpu)
+	{
+		copyDeviceToHost();
+	}
+	for(int i=0;i<m;++i)
+	{
+		for(int j=0;j<n;++j)
+			printf("%d ",curr_state_host[i*n+j]);
+		printf("\n");
+	}		
 }
 
 int* GoL::getStateGPU()
