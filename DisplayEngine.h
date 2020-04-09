@@ -74,6 +74,7 @@ public:
 	void updateStateCPU();
 	void updateStateCUDA();
 	
+	void renderImage();
 	void renderImageCPU();
 	void renderImageCUDA();
 	void drawCell(int x, int y);
