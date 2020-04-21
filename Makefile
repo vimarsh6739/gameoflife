@@ -32,8 +32,3 @@ main.o : main.cpp
 clean : 
 	rm -f $(TARGET) $(OBJS)
 
-
-
-    © 2020 GitHub, Inc.
-
-
