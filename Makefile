@@ -5,13 +5,35 @@ CC := gcc
 CXX := g++
 NVCC := nvcc
 
-CFLAGS := -Wall -g -O3
-LIBS := -lGL -lGLU -lglut
+CFLAGS= -Wall -g -O3
+LIBS= -lGL -lGLU -lglut
 
-OBJS := $(patsubst %.o,%.cpp)
-PROG := main
-DEPS := 
+OBJS= GoL_backend.o DisplayEngine.o main.o
 
-# Specifying targets
+TARGET= bin
+
+
+# Specifying build rules
+
+all : $(TARGET)
+
+$(TARGET) : $(OBJS)
+	$(NVCC) $^ -o $(TARGET) $(CFLAGS) $(LIBS)
+
+GoL_backend.o : GoL_backend.cu
+	$(NVCC) -c $< $(CFLAGS) $(LIBS)
+
+DisplayEngine.o : DisplayEngine.cpp
+	$(NVCC) -c $< $(CFLAGS) $(LIBS)
+
+main.o : main.cpp
+	$(CXX) -c $< $(CFLAGS) $(LIBS)
+
+clean : 
+	rm -f $(TARGET) $(OBJS)
+
+
+
+    © 2020 GitHub, Inc.
 
 
