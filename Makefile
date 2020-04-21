@@ -5,7 +5,7 @@ CC := gcc
 CXX := g++
 NVCC := nvcc
 
-CFLAGS= -Wall -g -O3
+CFLAGS= -g -O3
 LIBS= -lGL -lGLU -lglut
 
 OBJS= GoL_backend.o DisplayEngine.o main.o
