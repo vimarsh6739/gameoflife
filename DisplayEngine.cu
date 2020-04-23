@@ -57,7 +57,7 @@ void DisplayEngine::initParams(){
 
 	//Initialize game_object 
 	game_object = new GoL(rows,columns,true);
-	game_object->randInititialState();
+	game_object->randInitialState();
 	// game_object->printCells();
 }
 
@@ -132,7 +132,7 @@ void DisplayEngine::renderImageCUDA(){
 }
 
 void DisplayEngine::renderImage(){
-	if(game_object->cpuorgpu)
+	if(game_object->getIfCpuOrGpu())
 		renderImageCUDA();
 	else
 		renderImageCPU();
