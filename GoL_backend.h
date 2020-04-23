@@ -49,7 +49,7 @@ class GoL
 		bool isAlive(int i,int j);
     
 	//function to get inputs from a file, whose filename is given as a string parameter to the function
-		bool getInitialState(string filename);
+		bool getInitialState(std::string filename);
 	
     //function to compute the next state of the grid on the cpu using the host pointer state of the class, and update it 
 		void change_of_state_cpu();
