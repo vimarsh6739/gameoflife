@@ -23,12 +23,11 @@ $(TARGET) : $(OBJS)
 GoL_backend.o : GoL_backend.cu
 	$(NVCC) -c $< $(CFLAGS) $(LIBS)
 
-DisplayEngine.o : DisplayEngine.cpp
+DisplayEngine.o : DisplayEngine.cu
 	$(NVCC) -c $< $(CFLAGS) $(LIBS)
 
-main.o : main.cpp
-	$(CXX) -c $< $(CFLAGS) $(LIBS)
+main.o : main.cu
+	$(NVCC) -c $< $(CFLAGS) $(LIBS)
 
 clean : 
 	rm -f $(TARGET) $(OBJS)
-
