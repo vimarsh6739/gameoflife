@@ -84,7 +84,7 @@ void GoL::setInitialState(int _m,int _n,bool isCpuOrGpu,int* arr)
 	//copy the input parameter pointer to the host pointer
 	m=_m;
 	n=_n;
-	cpuorgpu=ifCpuOrGpu;
+	cpuorgpu=isCpuOrGpu;
 	for(int i=0;i<m;++i)
 	{
 		for(int j=0;j<n;++j)
@@ -96,7 +96,7 @@ void GoL::setInitialState(int _m,int _n,bool isCpuOrGpu,int* arr)
 	copyHostToDevice();
 }
 
-bool GoL::getInitialState(string filename)
+bool GoL::getInitialState(std::string filename)
 {
 	std::ifstream file(filename);
 	if(!(file.is_open()))
@@ -110,7 +110,7 @@ bool GoL::getInitialState(string filename)
 	for(int i=0;i<_m;++i)
 		for(int j=0;j<_n;++j)
 			file>>arr[i*_n+j];
-	setInitialState(_m,_n,isGpuOrCpu,arr);
+	setInitialState(_m,_n,isCpuOrGpu,arr);
 	file.close();
 	free(arr);
 	return true;
