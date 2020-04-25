@@ -1,107 +1,145 @@
 #include "CPU_gol.h"
 #include <random>
 
-CPU_gol::CPU_gol(){
+CPU_gol::CPU_gol()
+{
 
 }
 
 //Allot memory for state bitmap
-CPU_gol::CPU_gol(int rows, int columns) {
-	
-	//Seed the random number generator
+CPU_gol::CPU_gol(int rows, int columns)
+{
 	srand(time(NULL));
-	//Set rows, columns and bitmap
+
 	this->rows = rows;
 	this->columns = columns;
-	this->state = (int*)calloc(rows*columns,sizeof(int));
-	//Set global iteration counter
-	this->iter = 0;
+	N = rows*columns;
+
+	this->curr_state = (int*)calloc(N,sizeof(int));
+	this->next_state = (int*)calloc(N,sizeof(int));
+	this->state_color = (float*)calloc(3*N,sizeof(float));
+
+	this->updateIter = 0;
 
 }
 
-//Initialize the grid with a random value to start
-void CPU_gol::randInit(){
-	
-	//Randomly initialize the state values to 0 or 1
-	for(int i = 0; i < rows; ++i){
-		for(int j = 0; j <columns ; ++j){
-			state[i*columns + j] = (rand() % 2);
-		}
-	}
-}
-
-//Perform 1 iteration of update
-void CPU_gol::update_state() {
-
-	iter++;
-	//Do not update state for the first iteration
-	if(iter == 1){return;}
-
-	//Temporary array to store the next state values
-	std::vector<std::vector<int>> temp(rows,std::vector<int>(columns,0));
-
-	for(int i=0;i<rows;++i)
+void CPU_gol::randInit()
+{
+	int doa = 0;
+	int currPos = 0;
+	for(int i=0; i<rows; ++i)
 	{
 		for(int j=0;j<columns;++j)
 		{
-			int curr_pos=i*columns+j;
-			
-			temp[i][j]=state[curr_pos];
-			
-			int neighbour_val=-state[curr_pos];
-			
-			for(int i1=-1;i1<=1;++i1)
-			{
-				for(int j1=-1;j1<=1;++j1)
-				{
-					//the entire grid is warped around
-					int x=(i+i1+rows)%rows;
-					int y=(j+j1+columns)%columns;
-					
-					//computing the number of live neighbours
-					neighbour_val+=state[x*columns+y];
-				}
-			}
+			currPos = i*columns + j;
+			doa = rand() % 2;
+			curr_state[currPos] = doa;
+			state_color[3*currPos] = (float)doa;
+			state_color[3*currPos+1] = (float)doa;
+			state_color[3*currPos+2] = (float)doa;
+		}
+	}
+	findNextState();
+}
 
-			//enters if your current node is currently alive
-			if(state[curr_pos])
+int CPU_gol::getNeighbourCount(int top, int mid_r, int bottom, int left, int mid_c, int right)
+{
+	return   curr_state[top + left] 
+		   + curr_state[top + mid_c] 
+		   + curr_state[top + right]
+		   + curr_state[mid_r + left]  
+		   + curr_state[mid_r + right]
+		   + curr_state[bottom + left] 
+		   + curr_state[bottom + mid_c] 
+		   + curr_state[bottom + right];
+}
+
+void CPU_gol::findNextState()
+{
+	int currPos =0;
+	int nbrCnt = 0;
+	int top,bottom,mid_r,left,mid_c,right;
+	for(int i=0;i<rows;++i)
+	{
+		top=((i-1+rows)%rows)*columns;
+		bottom=((i+1)%rows)*columns;
+		mid_r = i*columns;
+
+		for(int j=0;j<columns;++j)
+		{
+			currPos = mid_r + j;
+			mid_c =j;
+			left = (j-1+columns)%columns;
+			right = (j+1)%columns;
+			nbrCnt = getNeighbourCount(top,mid_r,bottom,left,mid_c,right);
+			if(nbrCnt == 3 || ((nbrCnt==2)&&(curr_state[currPos]==1)))
 			{
-				//current node dies either by under population or over population respectively
-				if(neighbour_val<2||neighbour_val>3)
-				{
-					temp[i][j]=0;
-				}
+				next_state[currPos] = 1;
 			}
-			//enters if your current node is currently dead
 			else
 			{
-				//current dead node comes to life due to reproduction of neighbours
-				if(neighbour_val==3)
-				{
-					temp[i][j]=1;
-				}
+				next_state[currPos] = 0;
 			}
 		}
 	}
+}
 
-	//copy the temporary vector into the host state pointer after computation of all states
+void CPU_gol::updateState()
+{
+	updateIter++;
+	int currPos =0;
 	for(int i=0;i<rows;++i)
 	{
 		for(int j=0;j<columns;++j)
 		{
-			state[i*columns+j]=temp[i][j];
+			currPos= i*columns + j;
+			curr_state[currPos] = next_state[currPos];
+
+			//Can be changed later for colored update keeping track of previous state
+			state_color[3*currPos] = (float)next_state[currPos];
+			state_color[3*currPos+1] = (float)next_state[currPos];
+			state_color[3*currPos+2] = (float)next_state[currPos];
 		}
+	}
+
+	//Update next_state
+	findNextState();
+}
+
+bool CPU_gol::isAlive(int i, int j) 
+{
+	int currPos = i*columns + j;
+	return curr_state[currPos]==1 ;
+}
+
+float* CPU_gol::getStateColours()
+{
+	return state_color;
+}
+
+void CPU_gol::printCells()
+{
+	int currPos = 0;
+	for(int i=0;i < rows; ++i)
+	{
+		for(int j = 0; j < columns ;++j)
+		{
+			currPos = i*columns + j;
+			std::cout<<curr_state[currPos]<<" ";
+		}
+		std::cout<<"\n";
 	}
 }
 
-bool CPU_gol::isAlive(int i, int j) {
-	return state[i*columns + j] == 1;
-}
-
-void CPU_gol::printCells(){
-	for(int i=0;i < rows; ++i){
-		for(int j = 0; j < columns ;++j){
-			std::cout<<state[i*columns + j]<<" ";
+void CPU_gol::printColors()
+{
+	int currPos=0;
+	for(int i=0;i<rows;++i)
+	{
+		for(int j=0;j<columns;++j)
+		{
+			currPos = i*columns + j;
+			std::cout<<"("<<state_color[3*currPos]<<","<<state_color[3*currPos+1]<<","<<state_color[3*currPos+2]<<") ";
 		}
 		std::cout<<"\n";
 	}

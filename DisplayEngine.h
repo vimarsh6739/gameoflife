@@ -21,35 +21,35 @@
 #include <string>
 #include <cmath>
 
-//including the game class header
 #include "CPU_gol.h"
-
-//Add more headers here
-
 
 #ifndef DISPLAY_ENGINE_H
 #define DISPLAY_ENGINE_H
 
-class DisplayEngine{
+class DisplayEngine
+{
 
 private: 
-	//Add data members here
+	
 	static DisplayEngine* game; // Stores this pointer for game
 	
-	int rows; //breadth of grid
-	int columns; //height of grid
-	int n_cells; //number of cells
+	int rows; 		//breadth of grid
+	int columns; 	//height of grid
+	int N; 			//number of cells
 	
-	int fps; // frames per second
-	int width; // width of window 
-	int height; //height of window
+	int fps; 		// frames per second
+	int width; 		// width of window 
+	int height; 	//height of window
 	
-	bool useGPU; //flag to parallelize state computations using GPU
+	bool useGPU; 	//flag to parallelize state computations using GPU
 	
 	//Define more member variables here
 	//object of the game class that contains the state variables and the update and initialization functions
 	CPU_gol* game_object;
 	
+	//Define texture parameters
+	GLuint texture_map;	
+
 public:
 	
 	DisplayEngine();
@@ -57,7 +57,6 @@ public:
 	~DisplayEngine();
 	
 	//Callback functions 
-	// static void initializeWindow();
 	static void displayWindowCallback(void);
 	static void reshapeWindowCallback(int _w, int _h);
 	static void refreshWindowCallback(int _t);
@@ -66,18 +65,19 @@ public:
 	static void keyboardInput(unsigned char _c, int _x, int _y);
 	
 	void initParams();
+	void initTexture();
+	void updateTexture();
+	
 	void displayWindow();
 	void reshapeWindow(int _w, int _h);
 	void refreshWindow(int _t);
 	
-	void updateStateCPU();
-	void updateStateCUDA();
-	
-	void renderImageCPU();
-	void renderImageCUDA();
+	void drawLoop();
 	void drawCell(int x, int y);
+	void drawTexture();
 
 	void start();
+
 };
 
 #endif // DISPLAY_ENGINE_H
