@@ -41,7 +41,7 @@ private:
 	int width; 		// width of window 
 	int height; 	//height of window
 	
-	bool useGPU; 	//flag to parallelize state computations using GPU
+	bool pause;		//pause animation
 	
 	//Define more member variables here
 	//object of the game class that contains the state variables and the update and initialization functions
@@ -59,7 +59,7 @@ public:
 	//Callback functions 
 	static void displayWindowCallback(void);
 	static void reshapeWindowCallback(int _w, int _h);
-	static void refreshWindowCallback(int _t);
+	static void timerWindowCallback(int _t);
 	static void mousePositionCallback(int _x, int _y);
 	static void mouseClickCallback(int button, int state, int _x, int _y);
 	static void keyboardInput(unsigned char _c, int _x, int _y);
@@ -70,7 +70,7 @@ public:
 	
 	void displayWindow();
 	void reshapeWindow(int _w, int _h);
-	void refreshWindow(int _t);
+	void timerWindow(int _t);
 	
 	void drawLoop();
 	void drawCell(int x, int y);

@@ -56,15 +56,15 @@ void DisplayEngine::reshapeWindow(int _w, int _h)
 }
 
 //Timer callback
-void DisplayEngine::refreshWindowCallback(int _t)
+void DisplayEngine::timerWindowCallback(int _t)
 {
-	game->refreshWindow(_t);
+	game->timerWindow(_t);
 }
 
-void DisplayEngine::refreshWindow(int _t)
+void DisplayEngine::timerWindow(int _t)
 {
 	glutPostRedisplay();
-	glutTimerFunc(1000/fps,DisplayEngine::refreshWindowCallback,0);
+	glutTimerFunc(1000/fps,DisplayEngine::timerWindowCallback,0);
 }
 
 // Loop over all cells and draw
@@ -167,7 +167,7 @@ void DisplayEngine::start()
 	glutCreateWindow("Conway's Game of Life");
 	glutDisplayFunc(DisplayEngine::displayWindowCallback);
 	glutReshapeFunc(DisplayEngine::reshapeWindowCallback);
-	glutTimerFunc(0, DisplayEngine::refreshWindowCallback, 0);
+	glutTimerFunc(0, DisplayEngine::timerWindowCallback, 0);
 	initParams();
 	glutMainLoop();
 
