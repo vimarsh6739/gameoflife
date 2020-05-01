@@ -39,10 +39,10 @@ DisplayEngine::DisplayEngine(int argc, char* argv[])
 {
 	game = this;
 	
-	windowWidth = 512;
-	windowHeight = 512;
-	rows = 32;
-	columns = 32;
+	windowWidth = 1024;
+	windowHeight = 1024;
+	rows = 128;
+	columns = 128;
 	N = rows * columns;
 
 	FPS_DEBUG = 10;
@@ -208,7 +208,7 @@ void DisplayEngine::updateStats()
 	//Dynamic FPS
 	FPS = 1000.0 * frameCount/totalTime;
 
-	std::cout<<FPS<<"\n";
+	// std::cout<<FPS<<"\n";
 }
 
 //Print the text in msg starting at coordinates (x,y)
@@ -271,6 +271,24 @@ void DisplayEngine::displayWindow()
     glutSwapBuffers();
 }
 
+//Process keyboard character entered
+void DisplayEngine::keyboardInputCallback(unsigned char _c, int _x, int _y)
+{
+	game->keyboardInput(_c, _x, _y);	
+}
+
+void DisplayEngine::keyboardInput(unsigned char _c, int _x, int _y)
+{
+	//Spacebar pressed for pausing animation
+	if(_c == ' ')
+	{
+		pause = !pause;
+		if(pause==false){
+			glutPostRedisplay();
+		}
+	}
+}
+
 //Idle callback
 void DisplayEngine::idleWindowCallback()
 {
@@ -279,7 +297,9 @@ void DisplayEngine::idleWindowCallback()
 
 void DisplayEngine::idleWindow()
 {
-	glutPostRedisplay();
+	if(!pause){
+		glutPostRedisplay();
+	}
 }
 
 //Timer callback
@@ -304,6 +324,7 @@ void DisplayEngine::start()
 	//Register callback functions
 	glutDisplayFunc(DisplayEngine::displayWindowCallback);
 	glutReshapeFunc(DisplayEngine::reshapeWindowCallback);
+	glutKeyboardFunc(DisplayEngine::keyboardInputCallback);
 
 	if(DEBUG) 
 	{
@@ -319,5 +340,4 @@ void DisplayEngine::start()
 	initParams();
 	glutMainLoop();
 
-	std::cout<<"Finished displaying game of life\n";
 }

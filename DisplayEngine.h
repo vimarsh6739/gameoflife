@@ -49,6 +49,9 @@ private:
 	//Number of columns in the grid
 	int columns; 	
 
+	//Pause animation
+	bool pause;
+
 	// Benchmarking Variables---------------
 
 	//Debugging frame rate(maually set in debug mode)
@@ -99,16 +102,17 @@ public:
 	static void reshapeWindowCallback(int _w, int _h);
 	static void timerWindowCallback(int _t);
 	static void idleWindowCallback();
+	static void keyboardInputCallback(unsigned char _c, int _x, int _y);
 
 	// static void mousePositionCallback(int _x, int _y);
 	// static void mouseClickCallback(int button, int state, int _x, int _y);
-	// static void keyboardInput(unsigned char _c, int _x, int _y);
 	
 	void displayWindow();
 	void reshapeWindow(int _w, int _h);
 	void timerWindow(int _t);
 	void idleWindow();
-	
+	void keyboardInput(unsigned char _c, int _x, int _y);
+
 	void drawLoop();
 	void drawCell(int x, int y);
 
