@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <string>
 #include <cmath>
+#include <ctime>
 
 #include "CPU_gol.h"
 
@@ -33,21 +34,57 @@ private:
 	
 	static DisplayEngine* game; // Stores this pointer for game
 	
-	int rows; 		//breadth of grid
-	int columns; 	//height of grid
-	int N; 			//number of cells
+	//Basic window variables for grid game---------------
 	
-	int fps; 		// frames per second
-	int width; 		// width of window 
-	int height; 	//height of window
+	int windowWidth; 	 
+	int windowHeight; 	
 	
-	bool pause;		//pause animation
+	//Number of cells
+	int N;
+
+	//Number of rows in the grid
+	int rows; 		
 	
-	//Define more member variables here
-	//object of the game class that contains the state variables and the update and initialization functions
+	//Number of columns in the grid
+	int columns; 	
+
+	// Benchmarking Variables---------------
+
+	//Debugging frame rate(maually set in debug mode)
+	int FPS_DEBUG; 	
+
+	//Total time taken to render all frames in millis
+	double totalTime;
+
+	//Average time taken to draw 1 frame
+	double avgFrameTime; 
+	
+	//Current avg frame rate
+	double FPS;		
+
+	//Start time of program
+	clock_t startTick;	
+
+	// Begin and end ticks for drawing image
+	clock_t beginDrawTick;	
+	clock_t endDrawTick;	
+
+	//Actual time taken to draw current frame
+	clock_t deltaTime;	
+
+	//No of frames drawn in 1 sec
+	int frameCount;		
+
+	//Total number of updates in the game so far
+	int generationCount;
+	//----------------------------------------------
+
+	//Object of the game class that contains the state variables 
+	//and the update and initialization functions and upddates the grid 
+	//according to the specified rules
 	CPU_gol* game_object;
 	
-	//Define texture parameters
+	//Texture buffer id
 	GLuint texture_map;	
 
 public:
@@ -66,10 +103,6 @@ public:
 	// static void mouseClickCallback(int button, int state, int _x, int _y);
 	// static void keyboardInput(unsigned char _c, int _x, int _y);
 	
-	void initParams();
-	void initTexture();
-	void updateTexture();
-	
 	void displayWindow();
 	void reshapeWindow(int _w, int _h);
 	void timerWindow(int _t);
@@ -77,9 +110,17 @@ public:
 	
 	void drawLoop();
 	void drawCell(int x, int y);
+
+	void initTexture();
+	void updateTexture();
 	void drawTexture();
 
+	void updateStats();
+	void displayStats();
+	double clockToMilliseconds(clock_t ticks);
+	
 	void start();
+	void initParams();
 
 };
 

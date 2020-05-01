@@ -5,37 +5,65 @@
 //Declaration for static variable game
 DisplayEngine* DisplayEngine::game = NULL;
 
+//Function to convert clock ticks to milliseconds 
+//for frame rate calculation
+double DisplayEngine::clockToMilliseconds(clock_t ticks)
+{	
+	//CLOCKS_PER_SEC is system dependent
+	return 1000.0 * ((double)ticks/CLOCKS_PER_SEC);
+}
+
+//Default constructor
 DisplayEngine::DisplayEngine()
 {
-	//Safety decl
 	game = this;
-	width = 512;
-	height = 512;
-	rows = height;
-	columns = width;
+	windowWidth = 512;
+	windowHeight = 512;
+	rows = windowHeight;
+	columns = windowWidth;
 	N = rows * columns;
-	fps = 10;
+	FPS_DEBUG = 10;
+
+	totalTime = 0.0;
+	avgFrameTime = 0.0;
+	FPS = 0.0;
+	startTick = 0;
+	beginDrawTick = 0;
+	endDrawTick = 0;
+	deltaTime = 0;
+	frameCount = 0;
+	generationCount = 0;
 }
 
 DisplayEngine::DisplayEngine(int argc, char* argv[])
 {
 	game = this;
 	
-	width = 512;
-	height = 512;
-	
+	windowWidth = 512;
+	windowHeight = 512;
 	rows = 32;
 	columns = 32;
 	N = rows * columns;
-	fps = 10;
+
+	FPS_DEBUG = 10;
+
+	totalTime = 0.0;
+	avgFrameTime = 0.0;
+	FPS = 0.0;
+	startTick = 0;
+	beginDrawTick = 0;
+	endDrawTick = 0;
+	deltaTime = 0;
+	frameCount = 0;
+	generationCount = 0;
 
 	glutInit(&argc,argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-	glutInitWindowSize(width, height);
+	glutInitWindowSize(windowWidth, windowHeight);
 	glutInitWindowPosition(80,80);
 }
 
-//reshape callback
+//Reshape callback
 void DisplayEngine::reshapeWindowCallback(int _w, int _h)
 {
 	game->reshapeWindow(_w, _h);
@@ -43,8 +71,8 @@ void DisplayEngine::reshapeWindowCallback(int _w, int _h)
 
 void DisplayEngine::reshapeWindow(int _w, int _h)
 {
-	this->width = _w;
-	this->height = _h;
+	windowWidth = _w;
+	windowHeight = _h;
 
 	//Set the viewing area from (0,0) with width w and height h
 	glViewport(0,0,(GLsizei)_w,(GLsizei)_h);
@@ -52,32 +80,10 @@ void DisplayEngine::reshapeWindow(int _w, int _h)
 	//Generate new projection matrix
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+
 	//Set coordinate space for window
 	gluOrtho2D(0.0,1.0*rows,0.0,1.0*columns);
 	glMatrixMode(GL_MODELVIEW);	
-}
-
-//Idle callback
-void DisplayEngine::idleWindowCallback()
-{
-	game->idleWindow();
-}
-
-void DisplayEngine::idleWindow()
-{
-	glutPostRedisplay();
-}
-
-//Timer callback
-void DisplayEngine::timerWindowCallback(int _t)
-{
-	game->timerWindow(_t);
-}
-
-void DisplayEngine::timerWindow(int _t)
-{
-	glutPostRedisplay();
-	glutTimerFunc(1000/fps,DisplayEngine::timerWindowCallback,0);
 }
 
 //Initialize all parameters for game
@@ -184,8 +190,33 @@ void DisplayEngine::drawTexture()
 	glBindTexture(GL_TEXTURE_2D,0);
 }
 
+//Update the dynamic FPS and display it
+void DisplayEngine::updateStats()
+{
+	++frameCount;
+	++generationCount;
 
-//display callback
+	//No of clock cycles spent in rendering current img
+	deltaTime = endDrawTick - beginDrawTick;
+
+	//Total time is measured in milliseconds
+	totalTime += clockToMilliseconds(deltaTime);
+
+	//Number of milliseconds to render a frame on avg
+	avgFrameTime = totalTime/frameCount;
+
+	//Dynamic FPS
+	FPS = 1000.0 * frameCount/totalTime;
+}
+
+//Display Frame Rate, time to render and 
+//other parameters in the display window itself
+void DisplayEngine::displayStats()
+{
+	
+}
+
+//Display callback
 void DisplayEngine::displayWindowCallback()
 {
 	game->displayWindow();
@@ -197,15 +228,45 @@ void DisplayEngine::displayWindow()
 	//Clear screen
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);	
 	
-	//Update state and corresponding texture object
+	//Update current grid state, display and benchmark it
+	
+	beginDrawTick = clock();
+
 	game_object->updateState();
 	updateTexture();
-
-	//Display grid in texture
 	drawTexture();
+	
+	endDrawTick = clock();
+	
+	//Update and display render stats
+	updateStats();
+	displayStats();
 
 	//Swap buffers
     glutSwapBuffers();
+}
+
+//Idle callback
+void DisplayEngine::idleWindowCallback()
+{
+	game->idleWindow();
+}
+
+void DisplayEngine::idleWindow()
+{
+	glutPostRedisplay();
+}
+
+//Timer callback
+void DisplayEngine::timerWindowCallback(int _t)
+{
+	game->timerWindow(_t);
+}
+
+void DisplayEngine::timerWindow(int _t)
+{
+	glutPostRedisplay();
+	glutTimerFunc(1000/FPS_DEBUG,DisplayEngine::timerWindowCallback,0);
 }
 
 void DisplayEngine::start()
