@@ -1,5 +1,7 @@
 #include "DisplayEngine.h"
 
+#define DEBUG 0
+
 //Declaration for static variable game
 DisplayEngine* DisplayEngine::game = NULL;
 
@@ -55,6 +57,17 @@ void DisplayEngine::reshapeWindow(int _w, int _h)
 	glMatrixMode(GL_MODELVIEW);	
 }
 
+//Idle callback
+void DisplayEngine::idleWindowCallback()
+{
+	game->idleWindow();
+}
+
+void DisplayEngine::idleWindow()
+{
+	glutPostRedisplay();
+}
+
 //Timer callback
 void DisplayEngine::timerWindowCallback(int _t)
 {
@@ -65,6 +78,22 @@ void DisplayEngine::timerWindow(int _t)
 {
 	glutPostRedisplay();
 	glutTimerFunc(1000/fps,DisplayEngine::timerWindowCallback,0);
+}
+
+//Initialize all parameters for game
+void DisplayEngine::initParams()
+{	
+	//Set black background color
+	glClearColor(0,0,0,1);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+	//Initializing grid for computation - random initialization
+	game_object = new CPU_gol(rows,columns);
+	game_object->randInit();
+	
+	std::cout<<"Creating texture\n";
+	initTexture();
+	std::cout<<"Finished creating texture\n";
 }
 
 // Loop over all cells and draw
@@ -97,6 +126,34 @@ void DisplayEngine::drawCell(int x, int y)
    	glEnd();
 }
 
+//Initialize texture components
+void DisplayEngine::initTexture()
+{
+
+	glGenTextures(1,&texture_map);
+	glBindTexture(GL_TEXTURE_2D,texture_map);
+
+	//Set interpolation to nearest for points outside bounding box
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	//We want to clamp the bitmap we have to the borders of the image
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	//Map the color array state_colors in the game object to the current texture
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,rows,columns,0,GL_RGB,GL_FLOAT,game_object->getStateColours());
+	glBindTexture(GL_TEXTURE_2D,0);
+}
+
+//Update the texture object after updating state information
+void DisplayEngine::updateTexture()
+{
+	glBindTexture(GL_TEXTURE_2D, texture_map);
+	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,rows,columns,GL_RGB,GL_FLOAT,game_object->getStateColours());
+	glBindTexture(GL_TEXTURE_2D,0);
+}
+
 //Draw from texture map
 void DisplayEngine::drawTexture()
 {
@@ -127,13 +184,6 @@ void DisplayEngine::drawTexture()
 	glBindTexture(GL_TEXTURE_2D,0);
 }
 
-//Update the texture object after updating state information
-void DisplayEngine::updateTexture()
-{
-	glBindTexture(GL_TEXTURE_2D, texture_map);
-	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,rows,columns,GL_RGB,GL_FLOAT,game_object->getStateColours());
-	glBindTexture(GL_TEXTURE_2D,0);
-}
 
 //display callback
 void DisplayEngine::displayWindowCallback()
@@ -153,7 +203,6 @@ void DisplayEngine::displayWindow()
 
 	//Display grid in texture
 	drawTexture();
-	//drawLoop();
 
 	//Swap buffers
     glutSwapBuffers();
@@ -165,47 +214,24 @@ void DisplayEngine::start()
 
 	//Start by setting up window.
 	glutCreateWindow("Conway's Game of Life");
+
+	//Register callback functions
 	glutDisplayFunc(DisplayEngine::displayWindowCallback);
 	glutReshapeFunc(DisplayEngine::reshapeWindowCallback);
-	glutTimerFunc(0, DisplayEngine::timerWindowCallback, 0);
+
+	if(DEBUG) 
+	{
+		//Limiting Frame Rate for Debugging
+		glutTimerFunc(0, DisplayEngine::timerWindowCallback, 0);
+	}
+	else
+	{
+		//Maximum speed rendering
+		glutIdleFunc(DisplayEngine::idleWindowCallback);
+	}
+
 	initParams();
 	glutMainLoop();
 
 	std::cout<<"Finished displaying game of life\n";
-}
-
-//Initialize all parameters for game
-void DisplayEngine::initParams()
-{	
-	//Set black background color
-	glClearColor(0,0,0,1);
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-	//Initializing grid for computation - random initialization
-	game_object = new CPU_gol(rows,columns);
-	game_object->randInit();
-	
-	std::cout<<"Creating texture\n";
-	initTexture();
-	std::cout<<"Finished creating texture\n";
-}
-
-void DisplayEngine::initTexture()
-{
-
-	glGenTextures(1,&texture_map);
-	glBindTexture(GL_TEXTURE_2D,texture_map);
-
-	//Set interpolation to nearest for points outside bounding box
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	//We want to clamp the bitmap we have to the borders of the image
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-	//Map the color array state_colors in the game object to the current texture
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,rows,columns,0,GL_RGB,GL_FLOAT,game_object->getStateColours());
-	glBindTexture(GL_TEXTURE_2D,0);
-
 }
