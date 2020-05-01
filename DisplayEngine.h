@@ -17,6 +17,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 #include <string>
 #include <cmath>
@@ -58,7 +59,7 @@ private:
 
 	//Average time taken to draw 1 frame
 	double avgFrameTime; 
-	
+
 	//Current avg frame rate
 	double FPS;		
 
@@ -117,6 +118,7 @@ public:
 
 	void updateStats();
 	void displayStats();
+	void windowPrint(int x, int y, const char* str);
 	double clockToMilliseconds(clock_t ticks);
 	
 	void start();

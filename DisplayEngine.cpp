@@ -207,13 +207,37 @@ void DisplayEngine::updateStats()
 
 	//Dynamic FPS
 	FPS = 1000.0 * frameCount/totalTime;
+
+	std::cout<<FPS<<"\n";
+}
+
+//Print the text in msg starting at coordinates (x,y)
+void DisplayEngine::windowPrint(int x, int y, const char* msg)
+{
+	glColor3f(0.0,1.0,0.0);
+	glRasterPos2f(x,y);
+	int len = (int)strlen(msg);
+	for(int i=0;i<len;++i)
+	{
+		glutBitmapCharacter(GLUT_BITMAP_8_BY_13,msg[i]);
+	}
+	glColor3f(1.0,1.0,1.0);
 }
 
 //Display Frame Rate, time to render and 
 //other parameters in the display window itself
 void DisplayEngine::displayStats()
 {
+	//Pointer to constat string
+	const char* ptr;
+
+	//Display FPS at (0,0)
 	
+	std::stringstream ss;
+	ss<<"FPS = "<<FPS;
+	ptr = (ss.str()).c_str();
+	windowPrint(0,0,ptr);
+
 }
 
 //Display callback
@@ -233,14 +257,15 @@ void DisplayEngine::displayWindow()
 	beginDrawTick = clock();
 
 	game_object->updateState();
+	
 	updateTexture();
 	drawTexture();
+	displayStats();
 	
 	endDrawTick = clock();
 	
 	//Update and display render stats
 	updateStats();
-	displayStats();
 
 	//Swap buffers
     glutSwapBuffers();
