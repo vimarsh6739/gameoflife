@@ -1,9 +1,8 @@
 
 # Makefile to build game
 
-CC := gcc
-CXX := g++
-NVCC := nvcc
+CC= gcc
+CXX= g++
 
 CFLAGS= -g -O3
 LIBS= -lGL -lGLU -lglut
@@ -11,7 +10,6 @@ LIBS= -lGL -lGLU -lglut
 OBJS= GoL_backend.o DisplayEngine.o main.o
 
 TARGET= bin
-
 
 # Specifying build rules
 
