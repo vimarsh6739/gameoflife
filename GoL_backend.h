@@ -72,6 +72,9 @@ class GoL
 	//function to return if the computations are to be performed on the cpu (false) or gpu (true)
 		bool getIfCpuOrGpu();
 	
+	//function to return the generation of the current state	
+		int getIterationNumber();
+	
 	//function to switch computation device from cpu (false) to gpu(true) or vice versa
 		void switchComputation(bool switchTo);
 	
