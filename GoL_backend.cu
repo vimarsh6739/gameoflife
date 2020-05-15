@@ -67,6 +67,7 @@ GoL::GoL(int _m,int _n,bool ifCpuOrGpu)
 	cudaMalloc(&curr_state_device,m*n*sizeof(int));
 	cudaMalloc(&temporary_arr_for_device,m*n*sizeof(int));
 	curr_state_host=(int*)malloc(m*n*sizeof(int));
+	temporary_arr_for_host=(int*)malloc(m*n*sizeof(int));
 	cpuorgpu=ifCpuOrGpu;
 	iteration_number=0;
 }
@@ -85,6 +86,11 @@ void GoL::setInitialState(int _m,int _n,bool isCpuOrGpu,int* arr)
 	m=_m;
 	n=_n;
 	cpuorgpu=isCpuOrGpu;
+	cudaMalloc(&curr_state_device,m*n*sizeof(int));
+	cudaMalloc(&temporary_arr_for_device,m*n*sizeof(int));
+	curr_state_host=(int*)malloc(m*n*sizeof(int));
+	temporary_arr_for_host=(int*)malloc(m*n*sizeof(int));
+	iteration_number=0;
 	for(int i=0;i<m;++i)
 	{
 		for(int j=0;j<n;++j)
@@ -139,8 +145,7 @@ void GoL::change_of_state_cpu()
 	{
 		return;
 	}
-	//temporary array to store the next state values in order to not create data race
-	std::vector<std::vector<int>> temp(m,std::vector<int>(n));
+	
 	for(int i=0;i<m;++i)
 	{
 		for(int j=0;j<n;++j)
@@ -166,7 +171,7 @@ void GoL::change_of_state_cpu()
 				//current node dies either by under population or over population respectively
 				if(neighbour_val<2||neighbour_val>3)
 				{
-					temp[i][j]=0;
+					temporary_arr_for_host[i][j]=0;
 				}
 			}
 			//enters if your current node is currently dead
@@ -175,7 +180,7 @@ void GoL::change_of_state_cpu()
 				//current dead node comes to life due to reproduction of neighbours
 				if(neighbour_val==3)
 				{
-					temp[i][j]=1;
+					temporary_arr_for_host[i][j]=1;
 				}
 			}
 		}
@@ -186,7 +191,7 @@ void GoL::change_of_state_cpu()
 	{
 		for(int j=0;j<n;++j)
 		{
-			curr_state_host[i*n+j]=temp[i][j];
+			curr_state_host[i*n+j]=temporary_arr_for_host[i][j];
 		}
 	}
 }
@@ -238,6 +243,11 @@ int* GoL::getStateCPU()
 bool GoL::getIfCpuOrGpu()
 {
 	return cpuorgpu;
+}
+
+int GoL::getIterationNumber()
+{
+	return iteration_number;
 }
 
 void GoL::switchComputation(bool switchTo)
