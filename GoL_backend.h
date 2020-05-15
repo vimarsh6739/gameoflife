@@ -25,6 +25,9 @@ class GoL
     //this device array pointer is used in order to avoid computational overhead while computing the next state of the game on the gpu
 		int* temporary_arr_for_device;
 	
+	//this host array pointer is used in order to avoid computational overhead while computing the next state of the game on the cpu 
+		int* temporary_arr_for_host;
+	
     //copies the host array pointer to the device array pointer
 		void copyHostToDevice();
 
