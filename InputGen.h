@@ -13,6 +13,6 @@ class InputGen
         InputGen();
     
         /*function to generate 1 test file each for cpu and gpu (in order to benchmark against the same input)
-        for particular values of m and n*/
-        bool genFileInput(int m,int n);
+        for particular values of m and n, and returns the name of the file*/
+        std::string genFileInput(int m,int n);
 };
