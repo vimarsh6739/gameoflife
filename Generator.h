@@ -1,6 +1,6 @@
 #include "GoL_backend.h"
 
-class InputGen
+class Generator
 {
     private:
         
@@ -10,7 +10,7 @@ class InputGen
     public:
         
         //constructor to initialize the variable test_number to 1
-        InputGen();
+        Generator();
     
         /*function to generate 1 test file for particular values of m, n and the computation device used,
         and returns the name of the file*/
