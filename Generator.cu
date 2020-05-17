@@ -1,12 +1,12 @@
-#include "InputGen.h"
+#include "Generator.h"
 
-InputGen::InputGen()
+Generator::Generator()
 {
     test_number=1;
 }
 
 //since each call to the function creates two files, both files will have the prefix "cpu" and "gpu" as needed, followed by the test number
-std::string InputGen::genFileInput(int m,int n,bool ifCpuOrGpu)
+std::string Generator::genFileInput(int m,int n,bool ifCpuOrGpu)
 {
     std::string filename="";
     if(ifCpuOrGpu)
@@ -37,7 +37,7 @@ std::string InputGen::genFileInput(int m,int n,bool ifCpuOrGpu)
     return filename;
 }
 
-std::string InputGen::switchComputationFile(std::string filename)
+std::string Generator::switchComputationFile(std::string filename)
 {
     std::string outstring=filename;
     int m,n;
