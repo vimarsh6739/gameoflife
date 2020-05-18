@@ -3,8 +3,9 @@
 
 CC= gcc
 CXX= g++
+NVCC := nvcc
 
-CFLAGS= -g -O3
+CFLAGS= -std=c++11 -g -O3
 LIBS= -lGL -lGLU -lglut
 
 OBJS= GoL_backend.o DisplayEngine.o main.o
