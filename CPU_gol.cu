@@ -1,6 +1,7 @@
 #include "CPU_gol.h"
 #include <random>
 
+//Defining the kernel to update the color bitmap for the texture
 __global__ void updateStateColorKernel(int* curr_state_dev, int rows, int columns, int* next_state_dev, float* state_color_dev)
 {
 	//Finding the unique id of this thread
@@ -17,6 +18,7 @@ __global__ void updateStateColorKernel(int* curr_state_dev, int rows, int column
 	}
 }
 
+//Defining the kernel for the next state computation
 __global__ void findNextStateKernel(int* curr_state_dev, int rows, int columns, int* next_state_dev)
 {
 	//Finding the unique id of this thread
@@ -68,7 +70,7 @@ CPU_gol::CPU_gol()
 	// :)
 }
 
-//Allot memory for state bitmap
+//Allot memory for state bitmap - assume only CPU computation
 CPU_gol::CPU_gol(int rows, int columns)
 {
 	srand(time(NULL));
@@ -86,7 +88,7 @@ CPU_gol::CPU_gol(int rows, int columns)
 	this->isGpu = false;
 }
 
-//Allot memory for state bitmap
+//Allot memory for state bitmap - assume CPU <-> GPU computation
 CPU_gol::CPU_gol(int rows, int columns, bool isGpu)
 {
 	srand(time(NULL));
@@ -117,7 +119,8 @@ CPU_gol::CPU_gol(int rows, int columns, bool isGpu)
 	}
 }
 
-void CPU_gol::randInit()
+//Initialize the state matrix to a random initial state 
+void CPU_gol::randomInitialState()
 {
 	int doa = 0;
 	int currPos = 0;
@@ -138,10 +141,10 @@ void CPU_gol::randInit()
 	if(isGpu)
 	{
 		//Copy current state and colors
-		cudaMemcpy(curr_state_dev, curr_stat, N*sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(curr_state_dev, curr_state, N*sizeof(int), cudaMemcpyHostToDevice);
 		cudaMemcpy(state_color_dev, state_color, 3*N*sizeof(float), cudaMemcpyHostToDevice);
 
-		int nblocks = ceil((m*n)/1024.0);;
+		int nblocks = ceil((N)/1024.0);;
 
 		//Call a kernel to compute the next state value
 		findNextStateKernel<<<nblocks,1024>>>(curr_state_dev,rows,columns,next_state_dev);
@@ -155,6 +158,102 @@ void CPU_gol::randInit()
 	}
 }
 
+//Get initial state details from a file
+bool CPU_gol::getInitialState(std::string filename)
+{
+	std::ifstream file(filename);
+
+	if(!(file.is_open()))
+	{
+		return false;
+	}
+
+	int _m,_n;
+	bool isCpuOrGpu;
+	int* arr;
+	
+	file>>_m>>_n;
+	file>>isCpuOrGpu;
+	
+	arr=(int*)malloc(m*n*sizeof(int));
+	
+	for(int i=0;i<_m;++i)
+	{
+		for(int j=0;j<_n;++j)
+		{
+			file>>arr[i*_n+j];
+		}
+	}
+
+	setInitialState(_m,_n,isCpuOrGpu,arr);
+	file.close();
+
+	return true;
+}
+
+//Set member variables to values in file input
+void CPU_gol::setInitialState(int _m, int _n, bool isCpuOrGpu, int* arr)
+{
+	//Initialize all member vars
+	this->N = _m*_n;
+	this->rows = _m;
+	this->columns = _n;
+
+	this->isGpu = isCpuOrGpu;
+	this->curr_state = arr;
+
+	this->next_state = (int*)calloc(N,sizeof(int));
+	this->state_color = (float*)calloc(3*N,sizeof(float));
+	
+	//Initialize color for all states
+	for(int i=0;i<rows;++i)
+	{
+		for(int j=0;j<columns;++j)
+		{
+			int currPos = i*columns + j;
+			//Set cell position to white
+			if(arr[currPos])
+			{
+				state_color[3*currPos] = 1.0;
+				state_color[3*currPos+1] = 1.0;
+				state_color[3*currPos+2] = 1.0;
+			}
+		}
+	}
+
+	// findNextState();
+
+	if(isGpu)
+	{
+
+		//Allocate memory in GPU for all cuda arrays
+		cudaMalloc(&curr_state_dev, N*sizeof(int));
+		cudaMalloc(&next_state_dev, N*sizeof(int));
+		cudaMalloc(&state_color_dev, 3*N*sizeof(float));
+
+		//Copy host arrays to device
+		cudaMemcpy(curr_state_dev, curr_state, N*sizeof(int), cudaMemcpyHostToDevice);
+		// cudaMemcpy(next_state_dev, next_state, N*sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(state_color_dev, state_color, 3*N*sizeof(int), cudaMemcpyHostToDevice);
+		
+	}
+
+	//Update the next state exclusively in either CPU or GPU - save some preprocessing time
+	if(isGpu)
+	{
+		int nblocks = ceil((N)/1024.0);;
+
+		//Call a kernel to compute the next state value
+		findNextStateKernel<<<nblocks,1024>>>(curr_state_dev,rows,columns,next_state_dev);
+	}
+	else
+	{
+		findNextState();
+	}
+}
+
+//Get the number of neighbors around the current grid -> Only 0/1 
+//values present for next cells
 int CPU_gol::getNeighbourCount(int top, int mid_r, int bottom, int left, int mid_c, int right)
 {
 	return   curr_state[top + left] 
@@ -167,6 +266,7 @@ int CPU_gol::getNeighbourCount(int top, int mid_r, int bottom, int left, int mid
 		   + curr_state[bottom + right];
 }
 
+//Compute the next state information in the CPU
 void CPU_gol::findNextState()
 {
 	int currPos =0;
@@ -197,6 +297,7 @@ void CPU_gol::findNextState()
 	}
 }
 
+//Black box function to update game state(called by DisplayEngine)
 void CPU_gol::updateState()
 {
 	updateIter++;
@@ -204,7 +305,7 @@ void CPU_gol::updateState()
 	//Update next_state
 	if(isGpu)
 	{
-		int nblocks = ceil((m*n)/1024.0);;
+		int nblocks = ceil((N)/1024.0);;
 		//Update colurs for next state in GPU
 		updateStateColorKernel<<<nblocks,1024>>>(curr_state_dev,rows,columns,next_state_dev);
 		
@@ -235,15 +336,25 @@ void CPU_gol::updateState()
 	}
 }
 
+//Function which returns the current state colors
+//Used to update the texture in DisplayEngine
+float* CPU_gol::getStateColours()
+{
+	//To be replaced later while implementing interop
+	if(isGpu)
+	{
+		cudaMemcpy(state_color, state_color_dev, 3*N*sizeof(float), cudaMemcpyDeviceToHost);
+	}
+	
+	return state_color;
+}
+
+// A set of helper and checker functions
+
 bool CPU_gol::isAlive(int i, int j) 
 {
 	int currPos = i*columns + j;
 	return curr_state[currPos]==1 ;
-}
-
-float* CPU_gol::getStateColours()
-{
-	return state_color;
 }
 
 void CPU_gol::printCells()
@@ -271,5 +382,45 @@ void CPU_gol::printColors()
 			std::cout<<"("<<state_color[3*currPos]<<","<<state_color[3*currPos+1]<<","<<state_color[3*currPos+2]<<") ";
 		}
 		std::cout<<"\n";
+	}
+}
+
+//Returns the current generation number for benchmarking
+int CPU_gol::getIterationNumber()
+{
+	return this->updateIter;
+}
+
+void CPU_gol::toggleComputation()
+{
+	//Check if computation is in GPU
+	if(isGpu)
+	{
+		isGpu = false;
+		
+		//Copy all required vars to CPU memory
+		cudaMemcpy(curr_state, curr_state_dev, N*sizeof(int), cudaMemcpyDeviceToHost);
+		cudaMemcpy(next_state, next_state_dev, N*sizeof(int), cudaMemcpyDeviceToHost);
+		cudaMemcpy(state_color, state_color_dev, 3*N*sizeof(float), cudaMemcpyDeviceToHost);
+		
+		//Free gpu memory
+		cudaFree(curr_state_dev);
+		cudaFree(next_state_dev);
+		cudaFree(state_color_dev);
+	}
+	else
+	{
+		isGpu = true;
+
+		//Allocate memory in GPU for all cuda arrays
+		cudaMalloc(&curr_state_dev, N*sizeof(int));
+		cudaMalloc(&next_state_dev, N*sizeof(int));
+		cudaMalloc(&state_color_dev, 3*N*sizeof(float));
+
+		//Copy arrays from host to device
+		cudaMemcpy(curr_state_dev, curr_state, N*sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(next_state_dev, next_state, N*sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(state_color_dev, state_color, 3*N*sizeof(float), cudaMemcpyHostToDevice);
+
 	}
 }

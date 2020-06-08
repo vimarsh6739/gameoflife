@@ -95,7 +95,7 @@ void DisplayEngine::initParams()
 
 	//Initializing grid for computation - random initialization
 	game_object = new CPU_gol(rows,columns);
-	game_object->randInit();
+	game_object->randomInitialState();
 	
 	std::cout<<"Creating texture\n";
 	initTexture();

@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -52,23 +51,39 @@ class CPU_gol
 	
 	CPU_gol();
 
-	//Construcctor for implicit computation only on the CPU
+	//Constructor for implicit computation only on the CPU
 	CPU_gol(int rows, int columns);
 	
 	//Constructor to initialize the size of the grid and computation type of the object
 	CPU_gol(int rows, int columns, bool isGpu);
 
-	//Function to set a random initial state to both the host and the device pointers
-	void randInit();
-	
+	//Functions for initializing the conway grid---
+	void randomInitialState();
+	bool getInitialState(std::string filename);
+	void setInitialState(int _m, int _n, bool isCpuOrGpu, int* arr);
+
+	//Functions for next state computation in the CPU
 	int getNeighbourCount(int t,int mr,int b,int l,int c,int r);
 	void findNextState();
+
+	//Function called by display object to update state
+	//Automatically decides if the computation is handled by CPU or GPU 
+	//depending on the set value in isGpu
 	void updateState();
 
+	//Function called by display object during formation/update of texture
+	//object
+	float* getStateColours();
+	
+	//Function to switch computation from CPU <-> GPU
+	void toggleComputation();
+
+	//Functions for displaying/returning metrics
 	bool isAlive(int i, int j);
 	void printCells();
 	void printColors();
-	float* getStateColours();
+	int getIterationNumber();
+	
 };
 
 #endif // CPU_GOL_H
