@@ -8,13 +8,13 @@
 #include <ctime>
 #include <cuda.h>
 
-#ifndef CPU_GOL_H
-#define CPU_GOL_H
+#ifndef GOL_H
+#define GOL_H
 
 __global__ void findNextStateKernel(int* curr_state_dev, int rows, int columns, int* next_state_dev);
 __global__ void updateStateColorKernel(int* curr_state_dev, int rows, int columns, int* next_state_dev, float* state_color_dev);
 
-class CPU_gol
+class GoL
 {
 	private:
 
@@ -49,13 +49,13 @@ class CPU_gol
 
 	public:
 	
-	CPU_gol();
+	GoL();
 
 	//Constructor for implicit computation only on the CPU
-	CPU_gol(int rows, int columns);
+	GoL(int rows, int columns);
 	
 	//Constructor to initialize the size of the grid and computation type of the object
-	CPU_gol(int rows, int columns, bool isGpu);
+	GoL(int rows, int columns, bool isGpu);
 
 	//Functions for initializing the conway grid---
 	void randomInitialState();
@@ -86,4 +86,4 @@ class CPU_gol
 	
 };
 
-#endif // CPU_GOL_H
+#endif // GOL_H

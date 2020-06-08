@@ -1,4 +1,4 @@
-#include "CPU_gol.h"
+#include "GoL.h"
 #include <random>
 
 //Defining the kernel to update the color bitmap for the texture
@@ -64,14 +64,14 @@ __global__ void findNextStateKernel(int* curr_state_dev, int rows, int columns, 
 	}
 }
 
-CPU_gol::CPU_gol()
+GoL::GoL()
 {
 	//Empty default constructor
 	// :)
 }
 
 //Allot memory for state bitmap - assume only CPU computation
-CPU_gol::CPU_gol(int rows, int columns)
+GoL::GoL(int rows, int columns)
 {
 	srand(time(NULL));
 
@@ -89,7 +89,7 @@ CPU_gol::CPU_gol(int rows, int columns)
 }
 
 //Allot memory for state bitmap - assume CPU <-> GPU computation
-CPU_gol::CPU_gol(int rows, int columns, bool isGpu)
+GoL::GoL(int rows, int columns, bool isGpu)
 {
 	srand(time(NULL));
 
@@ -120,7 +120,7 @@ CPU_gol::CPU_gol(int rows, int columns, bool isGpu)
 }
 
 //Initialize the state matrix to a random initial state 
-void CPU_gol::randomInitialState()
+void GoL::randomInitialState()
 {
 	int doa = 0;
 	int currPos = 0;
@@ -159,7 +159,7 @@ void CPU_gol::randomInitialState()
 }
 
 //Get initial state details from a file
-bool CPU_gol::getInitialState(std::string filename)
+bool GoL::getInitialState(std::string filename)
 {
 	std::ifstream file(filename);
 
@@ -192,7 +192,7 @@ bool CPU_gol::getInitialState(std::string filename)
 }
 
 //Set member variables to values in file input
-void CPU_gol::setInitialState(int _m, int _n, bool isCpuOrGpu, int* arr)
+void GoL::setInitialState(int _m, int _n, bool isCpuOrGpu, int* arr)
 {
 	//Initialize all member vars
 	this->N = _m*_n;
@@ -254,7 +254,7 @@ void CPU_gol::setInitialState(int _m, int _n, bool isCpuOrGpu, int* arr)
 
 //Get the number of neighbors around the current grid -> Only 0/1 
 //values present for next cells
-int CPU_gol::getNeighbourCount(int top, int mid_r, int bottom, int left, int mid_c, int right)
+int GoL::getNeighbourCount(int top, int mid_r, int bottom, int left, int mid_c, int right)
 {
 	return   curr_state[top + left] 
 		   + curr_state[top + mid_c] 
@@ -267,7 +267,7 @@ int CPU_gol::getNeighbourCount(int top, int mid_r, int bottom, int left, int mid
 }
 
 //Compute the next state information in the CPU
-void CPU_gol::findNextState()
+void GoL::findNextState()
 {
 	int currPos =0;
 	int nbrCnt = 0;
@@ -298,7 +298,7 @@ void CPU_gol::findNextState()
 }
 
 //Black box function to update game state(called by DisplayEngine)
-void CPU_gol::updateState()
+void GoL::updateState()
 {
 	updateIter++;
 	
@@ -338,7 +338,7 @@ void CPU_gol::updateState()
 
 //Function which returns the current state colors
 //Used to update the texture in DisplayEngine
-float* CPU_gol::getStateColours()
+float* GoL::getStateColours()
 {
 	//To be replaced later while implementing interop
 	if(isGpu)
@@ -351,13 +351,13 @@ float* CPU_gol::getStateColours()
 
 // A set of helper and checker functions
 
-bool CPU_gol::isAlive(int i, int j) 
+bool GoL::isAlive(int i, int j) 
 {
 	int currPos = i*columns + j;
 	return curr_state[currPos]==1 ;
 }
 
-void CPU_gol::printCells()
+void GoL::printCells()
 {
 	int currPos = 0;
 	for(int i=0;i < rows; ++i)
@@ -371,7 +371,7 @@ void CPU_gol::printCells()
 	}
 }
 
-void CPU_gol::printColors()
+void GoL::printColors()
 {
 	int currPos=0;
 	for(int i=0;i<rows;++i)
@@ -386,12 +386,12 @@ void CPU_gol::printColors()
 }
 
 //Returns the current generation number for benchmarking
-int CPU_gol::getIterationNumber()
+int GoL::getIterationNumber()
 {
 	return this->updateIter;
 }
 
-void CPU_gol::toggleComputation()
+void GoL::toggleComputation()
 {
 	//Check if computation is in GPU
 	if(isGpu)

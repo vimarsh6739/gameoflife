@@ -25,7 +25,7 @@
 #include <ctime>
 
 //including the game class header
-#include "GoL_backend.h"
+#include "GoL.h"
 
 #ifndef DISPLAY_ENGINE_H
 #define DISPLAY_ENGINE_H
