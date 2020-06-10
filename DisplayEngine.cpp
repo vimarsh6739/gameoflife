@@ -13,15 +13,38 @@ double DisplayEngine::clockToMilliseconds(clock_t ticks)
 	return 1000.0 * ((double)ticks/CLOCKS_PER_SEC);
 }
 
-//Default constructor
+//Default constructor - display a simple 10*10 grid with random input 
 DisplayEngine::DisplayEngine()
+{
+	game = this;
+	windowWidth = windowHeight = 512;
+	rows = columns = 10;
+	N = rows * columns;
+	
+	FPS_DEBUG = 10;
+	totalTime = 0.0;
+	avgFrameTime = 0.0;
+	FPS = 0.0;
+	startTick = 0;
+	beginDrawTick = 0;
+	endDrawTick = 0;
+	deltaTime = 0;
+	frameCount = 0;
+	
+	generationCount = 0;
+}
+
+//Constructor for general random input
+DisplayEngine::DisplayEngine(int rows, int cols)
 {
 	game = this;
 	windowWidth = 512;
 	windowHeight = 512;
-	rows = windowHeight;
-	columns = windowWidth;
+
+	this->rows = rows;
+	this->columns = cols;
 	N = rows * columns;
+
 	FPS_DEBUG = 10;
 
 	totalTime = 0.0;
@@ -35,15 +58,16 @@ DisplayEngine::DisplayEngine()
 	generationCount = 0;
 }
 
-DisplayEngine::DisplayEngine(int argc, char* argv[])
+//Constructor for initializing parameters given a config file
+DisplayEngine::DisplayEngine(std::string fname)
 {
 	game = this;
-	
 	windowWidth = 1024;
 	windowHeight = 1024;
-	rows = 128;
-	columns = 128;
-	N = rows * columns;
+	
+	// this->rows = rows;
+	// this->columns = cols;
+	// N = rows * columns;
 
 	FPS_DEBUG = 10;
 
@@ -57,10 +81,6 @@ DisplayEngine::DisplayEngine(int argc, char* argv[])
 	frameCount = 0;
 	generationCount = 0;
 
-	glutInit(&argc,argv);
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-	glutInitWindowSize(windowWidth, windowHeight);
-	glutInitWindowPosition(80,80);
 }
 
 //Reshape callback
@@ -314,14 +334,20 @@ void DisplayEngine::timerWindow(int _t)
 	glutTimerFunc(1000/FPS_DEBUG,DisplayEngine::timerWindowCallback,0);
 }
 
-void DisplayEngine::start()
+void DisplayEngine::start(int argc, char* argv[])
 {
 	std::cout<<"Starting display\n";
 
-	//Start by setting up window.
+	//Setup window parameters
+	glutInit(&argc,argv);
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+	glutInitWindowSize(windowWidth, windowHeight);
+	glutInitWindowPosition(80,80);
+
+	//Name the window
 	glutCreateWindow("Conway's Game of Life");
 
-	//Register callback functions
+	//Register required functions
 	glutDisplayFunc(DisplayEngine::displayWindowCallback);
 	glutReshapeFunc(DisplayEngine::reshapeWindowCallback);
 	glutKeyboardFunc(DisplayEngine::keyboardInputCallback);

@@ -1,5 +1,3 @@
-
-
 /*Making Generic engine for a grid based game*/
 
 #ifdef __APPLE__
@@ -24,7 +22,7 @@
 #include <cmath>
 #include <ctime>
 
-//including the game class header
+#include <cuda.h>
 #include "GoL.h"
 
 #ifndef DISPLAY_ENGINE_H
@@ -48,10 +46,6 @@ private:
 	//Number of rows in the grid
 	int rows; 		
 	
-	//Define more member variables here
-	//object of the game class that contains the state variables and the update and initialization functions
-	GoL* game_object;
-
 	//Number of columns in the grid
 	int columns; 	
 
@@ -87,20 +81,23 @@ private:
 
 	//Total number of updates in the game so far
 	int generationCount;
-	//----------------------------------------------
 
 	//Object of the game class that contains the state variables 
 	//and the update and initialization functions and upddates the grid 
 	//according to the specified rules
-	CPU_gol* game_object;
+	GoL* game_object;
 	
 	//Texture buffer id
 	GLuint texture_map;	
 
 public:
 	
+	//Defining constructors for random input and 
+	//configuration files
+
 	DisplayEngine();
-	DisplayEngine(int argc, char* argv[]);
+	DisplayEngine(int rows, int cols);
+	DisplayEngine(std::string fname);
 	~DisplayEngine();
 	
 	//Callback functions 
@@ -132,9 +129,9 @@ public:
 	void windowPrint(int x, int y, const char* str);
 	double clockToMilliseconds(clock_t ticks);
 	
-	void start();
 	void initParams();
-
+	
+	void start(int argc, char* argv[]);
 };
 
 #endif // DISPLAY_ENGINE_H
