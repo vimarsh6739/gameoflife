@@ -157,8 +157,25 @@ void DisplayEngine::keyboardInput(unsigned char _c, int _x, int _y)
 	if(_c == ' ')
 	{
 		pause = !pause;
-		if(pause==false){
+		if(pause==false)
+		{
 			glutPostRedisplay();
+		}
+	}
+	//'T' or 't' for toggling computation between the cpu and the gpu
+	else if(_c == 't' || _c == 'T')
+	{
+		isGpu = !isGpu;
+		std::cout<<"Switching compute mode...\n";
+		game_object->toggleComputation();
+
+		if(isGpu)
+		{
+			std::cout<<"Compute mode set to GPU\n";
+		}
+		else
+		{
+			std::cout<<"Compute mode set to CPU\n";
 		}
 	}
 }
