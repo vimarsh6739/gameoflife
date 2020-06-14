@@ -8,7 +8,7 @@ NVCC := nvcc
 CFLAGS= -std=c++11 -g -O3
 LIBS= -lGL -lGLU -lglut
 
-OBJS= GoL_backend.o DisplayEngine.o main.o
+OBJS= GoL.o DisplayEngine.o main.o
 
 TARGET= bin
 
@@ -19,7 +19,7 @@ all : $(TARGET)
 $(TARGET) : $(OBJS)
 	$(NVCC) $^ -o $(TARGET) $(CFLAGS) $(LIBS)
 
-GoL_backend.o : GoL_backend.cu
+GoL.o : GoL.cu
 	$(NVCC) -c $< $(CFLAGS) $(LIBS)
 
 DisplayEngine.o : DisplayEngine.cu
