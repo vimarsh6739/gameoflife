@@ -104,6 +104,7 @@ GoL::GoL(int rows, int columns, bool isGpu)
 	this->updateIter = 0;
 
 	this->isGpu = isGpu;
+	this->config_file = "random.txt";
 
 	if(isGpu)
 	{
@@ -119,8 +120,16 @@ GoL::GoL(int rows, int columns, bool isGpu)
 	}
 }
 
+//Store config file name and boolean for gpu computation
+GoL::GoL(bool isGpu, std::string fname)
+{
+	this->isGpu = isGpu;
+	this->config_file = fname;
+	this->updateIter = 0;
+}
+
 //Initialize the state matrix to a random initial state 
-void GoL::randomInitialState()
+void GoL::setRandomInitialState()
 {
 	int doa = 0;
 	int currPos = 0;
@@ -212,7 +221,7 @@ void GoL::setInitialState(int _m, int _n, bool isCpuOrGpu, int* arr)
 		{
 			int currPos = i*columns + j;
 			//Set cell position to white
-			if(arr[currPos])
+			if(arr[currPos]==1)
 			{
 				state_color[3*currPos] = 1.0;
 				state_color[3*currPos+1] = 1.0;
@@ -307,7 +316,7 @@ void GoL::updateState()
 	{
 		int nblocks = ceil((N)/1024.0);;
 		//Update colurs for next state in GPU
-		updateStateColorKernel<<<nblocks,1024>>>(curr_state_dev,rows,columns,next_state_dev);
+		updateStateColorKernel<<<nblocks,1024>>>(curr_state_dev,rows,columns,next_state_dev,state_color_dev);
 		
 		//Call a kernel to compute the next state value
 		findNextStateKernel<<<nblocks,1024>>>(curr_state_dev,rows,columns,next_state_dev);

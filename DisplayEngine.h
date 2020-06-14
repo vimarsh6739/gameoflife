@@ -35,60 +35,73 @@ private:
 	
 	static DisplayEngine* game; // Stores this pointer for game
 	
-	//Basic window variables for grid game---------------
+	//Environment variables for grid game---------------
 	
-	int windowWidth; 	 
-	int windowHeight; 	
-	
-	//Number of cells
-	int N;
+		int windowWidth; 	 
+		int windowHeight; 	
+		
+		//Number of cells
+		int N;
 
-	//Number of rows in the grid
-	int rows; 		
-	
-	//Number of columns in the grid
-	int columns; 	
+		//Number of rows in the grid
+		int rows; 		
+		
+		//Number of columns in the grid
+		int columns; 	
 
-	//Pause animation
-	bool pause;
+		//Pause animation
+		bool pause;
 
+		//Flag to indicate if config file has been provided
+		bool isRandInit;
+
+		//Flag to check if computation is on CPU or GPU
+		bool isGpu;
+
+		//File which contains config details
+		std::string config_file;
+
+		//Color encoded state variable(in host mem.)
+		float* state_color;
+		
+		//Texture buffer id
+		GLuint texture_map;
 	// Benchmarking Variables---------------
 
-	//Debugging frame rate(maually set in debug mode)
-	int FPS_DEBUG; 	
+		//Debugging frame rate(maually set in debug mode)
+		int FPS_DEBUG; 	
 
-	//Total time taken to render all frames in millis
-	double totalTime;
+		//Total time taken to render all frames in millis
+		double totalTime;
 
-	//Average time taken to draw 1 frame
-	double avgFrameTime; 
+		//Average time taken to draw 1 frame
+		double avgFrameTime; 
 
-	//Current avg frame rate
-	double FPS;		
+		//Current avg frame rate
+		double FPS;		
 
-	//Start time of program
-	clock_t startTick;	
+		//Start time of program
+		clock_t startTick;	
 
-	// Begin and end ticks for drawing image
-	clock_t beginDrawTick;	
-	clock_t endDrawTick;	
+		// Begin and end ticks for drawing image
+		clock_t beginDrawTick;	
+		clock_t endDrawTick;	
 
-	//Actual time taken to draw current frame
-	clock_t deltaTime;	
+		//Actual time taken to draw current frame
+		clock_t deltaTime;	
 
-	//No of frames drawn in 1 sec
-	int frameCount;		
+		//No of frames drawn in 1 sec
+		int frameCount;		
 
-	//Total number of updates in the game so far
-	int generationCount;
+		//Total number of updates in the game so far
+		int generationCount;
 
 	//Object of the game class that contains the state variables 
 	//and the update and initialization functions and upddates the grid 
 	//according to the specified rules
 	GoL* game_object;
 	
-	//Texture buffer id
-	GLuint texture_map;	
+		
 
 public:
 	
@@ -119,18 +132,16 @@ public:
 
 	void drawLoop();
 	void drawCell(int x, int y);
-
-	void initTexture();
-	void updateTexture();
 	void drawTexture();
+	void updateTexture();
 
 	void updateStats();
 	void displayStats();
 	void windowPrint(int x, int y, const char* str);
 	double clockToMilliseconds(clock_t ticks);
 	
-	void initParams();
-	
+	void initializeTexture();
+	void initializeParameters();
 	void start(int argc, char* argv[]);
 };
 

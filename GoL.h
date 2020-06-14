@@ -23,6 +23,9 @@ class GoL
 	int columns;
 	int N;
 
+	//Defining configuration file
+	std::string config_file;
+
     //Keeps track of nodes on CPU
 	int* curr_state;
 
@@ -57,9 +60,16 @@ class GoL
 	//Constructor to initialize the size of the grid and computation type of the object
 	GoL(int rows, int columns, bool isGpu);
 
-	//Functions for initializing the conway grid---
-	void randomInitialState();
+	//Constructor to specify compute state and config file
+	GoL(bool isGpu, std::string fname);
+
+	//Initialize state to random values
+	void setRandomInitialState();
+
+	//Get initial state configuration from a config file
 	bool getInitialState(std::string filename);
+
+	//Set the members of the class to the state read from the config file
 	void setInitialState(int _m, int _n, bool isCpuOrGpu, int* arr);
 
 	//Functions for next state computation in the CPU

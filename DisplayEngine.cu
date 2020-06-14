@@ -20,6 +20,9 @@ DisplayEngine::DisplayEngine()
 	windowWidth = windowHeight = 512;
 	rows = columns = 10;
 	N = rows * columns;
+
+	isRandInit = true;
+	config_file = "random.txt";
 	
 	FPS_DEBUG = 10;
 	totalTime = 0.0;
@@ -44,6 +47,9 @@ DisplayEngine::DisplayEngine(int rows, int cols)
 	this->rows = rows;
 	this->columns = cols;
 	N = rows * columns;
+	
+	isRandInit = true;
+	config_file = "random.txt";
 
 	FPS_DEBUG = 10;
 
@@ -68,6 +74,9 @@ DisplayEngine::DisplayEngine(std::string fname)
 	// this->rows = rows;
 	// this->columns = cols;
 	// N = rows * columns;
+	
+	isRandInit = false;
+	config_file = fname;
 
 	FPS_DEBUG = 10;
 
@@ -80,7 +89,6 @@ DisplayEngine::DisplayEngine(std::string fname)
 	deltaTime = 0;
 	frameCount = 0;
 	generationCount = 0;
-
 }
 
 //Reshape callback
@@ -106,21 +114,6 @@ void DisplayEngine::reshapeWindow(int _w, int _h)
 	glMatrixMode(GL_MODELVIEW);	
 }
 
-//Initialize all parameters for game
-void DisplayEngine::initParams()
-{	
-	//Set black background color
-	glClearColor(0,0,0,1);
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-	//Initializing grid for computation - random initialization
-	game_object = new CPU_gol(rows,columns);
-	game_object->randomInitialState();
-	
-	std::cout<<"Creating texture\n";
-	initTexture();
-	std::cout<<"Finished creating texture\n";
-}
 
 // Loop over all cells and draw
 void DisplayEngine::drawLoop()
@@ -150,145 +143,6 @@ void DisplayEngine::drawCell(int x, int y)
     glVertex3f(x,y-1,0.0);
    	
    	glEnd();
-}
-
-//Initialize texture components
-void DisplayEngine::initTexture()
-{
-
-	glGenTextures(1,&texture_map);
-	glBindTexture(GL_TEXTURE_2D,texture_map);
-
-	//Set interpolation to nearest for points outside bounding box
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	//We want to clamp the bitmap we have to the borders of the image
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-	//Map the color array state_colors in the game object to the current texture
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,rows,columns,0,GL_RGB,GL_FLOAT,game_object->getStateColours());
-	glBindTexture(GL_TEXTURE_2D,0);
-}
-
-//Update the texture object after updating state information
-void DisplayEngine::updateTexture()
-{
-	glBindTexture(GL_TEXTURE_2D, texture_map);
-	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,rows,columns,GL_RGB,GL_FLOAT,game_object->getStateColours());
-	glBindTexture(GL_TEXTURE_2D,0);
-}
-
-//Draw from texture map
-void DisplayEngine::drawTexture()
-{
-	glBindTexture(GL_TEXTURE_2D,texture_map);
-	glEnable(GL_TEXTURE_2D);
-
-	glBegin(GL_QUADS);
-
-		//Specify bottom left
-		glTexCoord2i(0,0);
-		glVertex2i(0,0);
-
-		//Specify top left
-		glTexCoord2i(0,1);
-		glVertex2i(0,columns);
-		
-		//Specify top right
-		glTexCoord2i(1,1);
-		glVertex2i(rows,columns);
-		
-		//Specify bottom right
-		glTexCoord2i(1,0);
-		glVertex2i(rows,0);
-	
-	glEnd();
-
-	glDisable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D,0);
-}
-
-//Update the dynamic FPS and display it
-void DisplayEngine::updateStats()
-{
-	++frameCount;
-	++generationCount;
-
-	//No of clock cycles spent in rendering current img
-	deltaTime = endDrawTick - beginDrawTick;
-
-	//Total time is measured in milliseconds
-	totalTime += clockToMilliseconds(deltaTime);
-
-	//Number of milliseconds to render a frame on avg
-	avgFrameTime = totalTime/frameCount;
-
-	//Dynamic FPS
-	FPS = 1000.0 * frameCount/totalTime;
-
-	// std::cout<<FPS<<"\n";
-}
-
-//Print the text in msg starting at coordinates (x,y)
-void DisplayEngine::windowPrint(int x, int y, const char* msg)
-{
-	glColor3f(0.0,1.0,0.0);
-	glRasterPos2f(x,y);
-	int len = (int)strlen(msg);
-	for(int i=0;i<len;++i)
-	{
-		glutBitmapCharacter(GLUT_BITMAP_8_BY_13,msg[i]);
-	}
-	glColor3f(1.0,1.0,1.0);
-}
-
-//Display Frame Rate, time to render and 
-//other parameters in the display window itself
-void DisplayEngine::displayStats()
-{
-	//Pointer to constat string
-	const char* ptr;
-
-	//Display FPS at (0,0)
-	
-	std::stringstream ss;
-	ss<<"FPS = "<<FPS;
-	ptr = (ss.str()).c_str();
-	windowPrint(0,0,ptr);
-
-}
-
-//Display callback
-void DisplayEngine::displayWindowCallback()
-{
-	game->displayWindow();
-}
-
-//Update automation state and display
-void DisplayEngine::displayWindow()
-{
-	//Clear screen
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);	
-	
-	//Update current grid state, display and benchmark it
-	
-	beginDrawTick = clock();
-
-	game_object->updateState();
-	
-	updateTexture();
-	drawTexture();
-	displayStats();
-	
-	endDrawTick = clock();
-	
-	//Update and display render stats
-	updateStats();
-
-	//Swap buffers
-    glutSwapBuffers();
 }
 
 //Process keyboard character entered
@@ -334,6 +188,218 @@ void DisplayEngine::timerWindow(int _t)
 	glutTimerFunc(1000/FPS_DEBUG,DisplayEngine::timerWindowCallback,0);
 }
 
+//Update the dynamic FPS and display it
+void DisplayEngine::updateStats()
+{
+	++frameCount;
+	++generationCount;
+
+	//No of clock cycles spent in rendering current img
+	deltaTime = endDrawTick - beginDrawTick;
+
+	//Total time is measured in milliseconds
+	totalTime += clockToMilliseconds(deltaTime);
+
+	//Number of milliseconds to render a frame on avg
+	avgFrameTime = totalTime/frameCount;
+
+	//Dynamic FPS
+	FPS = 1000.0 * frameCount/totalTime;
+
+	// std::cout<<FPS<<"\n";
+}
+
+//Print the text in msg starting at coordinates (x,y)
+void DisplayEngine::windowPrint(int x, int y, const char* msg)
+{
+	//Print screen info in green color
+	glColor3f(0.0,1.0,0.0);
+	glRasterPos2f(x,y);
+
+	int len = (int)strlen(msg);
+	for(int i=0;i<len;++i)
+	{
+		glutBitmapCharacter(GLUT_BITMAP_8_BY_13,msg[i]);
+	}
+
+	//Switch back to white for further rendering
+	glColor3f(1.0,1.0,1.0);
+}
+
+//Display Frame Rate, time to render and 
+//other parameters in the display window itself
+void DisplayEngine::displayStats()
+{
+	//Pointer to constat string
+	const char* ptr;
+
+	//Print the message to be printed onto screen in ss
+	std::stringstream ss;
+	
+	ss<<"FPS = "<<FPS<<"\n";
+	ss<<"GPU compute = "<<isGpu<<"\n";
+	ptr = (ss.str()).c_str();
+
+	//call to print message byte by byte to window
+	windowPrint(0,0,ptr);
+}
+
+//Draw from texture map
+void DisplayEngine::drawTexture()
+{
+	//bind tex obj
+	glBindTexture(GL_TEXTURE_2D,texture_map);
+	glEnable(GL_TEXTURE_2D);
+
+	//map 1x1 square grid text to rows x columns disp
+	glBegin(GL_QUADS);
+
+		//Specify bottom left
+		glTexCoord2i(0,0);
+		glVertex2i(0,0);
+
+		//Specify top left
+		glTexCoord2i(0,1);
+		glVertex2i(0,columns);
+		
+		//Specify top right
+		glTexCoord2i(1,1);
+		glVertex2i(rows,columns);
+		
+		//Specify bottom right
+		glTexCoord2i(1,0);
+		glVertex2i(rows,0);
+	
+	glEnd();
+
+	//unbind tex obj
+	glDisable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,0);
+}
+
+//Update the texture object after updating state information
+void DisplayEngine::updateTexture()
+{
+	//Map the color array state_colors in the game object to the current texture
+	this->state_color = game_object->getStateColours();
+	
+	//Update texture object
+	glBindTexture(GL_TEXTURE_2D, texture_map);
+	glTexSubImage2D(GL_TEXTURE_2D,
+					0,
+					0,
+					0,
+					rows,
+					columns,
+					GL_RGB,
+					GL_FLOAT,
+					this->state_color);
+
+	//Unbind tex obj
+	glBindTexture(GL_TEXTURE_2D,0);
+}
+
+//Display callback
+void DisplayEngine::displayWindowCallback()
+{
+	game->displayWindow();
+}
+
+//Update automation state and display
+void DisplayEngine::displayWindow()
+{
+	//Clear screen
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);	
+	
+	//begin clock
+	beginDrawTick = clock();
+
+	//calc and update next state and color
+	game_object->updateState();
+	
+	//update the texture object
+	updateTexture();
+	drawTexture();
+
+	//display FPS and other stats
+	displayStats();
+	
+	//end clk 
+	endDrawTick = clock();
+	
+	//Update render stats
+	updateStats();
+
+	//Swap buffers
+    glutSwapBuffers();
+}
+
+//Initialize texture components
+void DisplayEngine::initializeTexture()
+{
+	glGenTextures(1,&texture_map);
+	glBindTexture(GL_TEXTURE_2D,texture_map);
+
+	//Set interpolation to nearest for points outside bounding box
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	//We want to clamp the bitmap we have to the borders of the image
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	//Map the color array state_colors in the game object to the current texture
+	this->state_color = game_object->getStateColours();
+	
+	glTexImage2D(GL_TEXTURE_2D,
+				0,
+				GL_RGB,
+				rows,
+				columns,
+				0,
+				GL_RGB,
+				GL_FLOAT,
+				this->state_color);
+
+	glBindTexture(GL_TEXTURE_2D,0);
+}
+
+//Initialize all parameters for game
+void DisplayEngine::initializeParameters()
+{	
+	//Set black background color
+	glClearColor(0,0,0,1);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+	//Initializing grid for computation - random initialization
+	
+	std::cout<<"Initializing the grid\n";
+	if(isRandInit)
+	{
+		game_object = new GoL(rows,columns,isGpu);
+		game_object->setRandomInitialState();
+	}
+	else
+	{
+		game_object = new GoL(isGpu,config_file);
+		game_object->getInitialState(config_file);
+
+		//Set grid parameters skipped in constructor
+		this->rows = game_object->rows;
+		this->columns = game_object->columns;
+		this->N = game_object->N;
+	}
+
+	std::cout<<"Finished initializing the grid\n";
+
+	//Setup texture object
+	std::cout<<"Initializing the texture\n";
+	initializeTexture();
+	std::cout<<"Finished initializing the texture\n";
+	
+	std::cout<<"Starting render...\n";
+}
+
 void DisplayEngine::start(int argc, char* argv[])
 {
 	std::cout<<"Starting display\n";
@@ -363,7 +429,9 @@ void DisplayEngine::start(int argc, char* argv[])
 		glutIdleFunc(DisplayEngine::idleWindowCallback);
 	}
 
-	initParams();
-	glutMainLoop();
+	//Setup texture/state and game object before initial display
+	initializeParameters();
 
+	//Start render loop
+	glutMainLoop();
 }
