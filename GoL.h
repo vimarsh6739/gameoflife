@@ -81,9 +81,17 @@ class GoL
 	//depending on the set value in isGpu
 	void updateState();
 
-	//Function called by display object during formation/update of texture
-	//object
+	//Returns state_color
 	float* getStateColours();
+	
+	//Returns the number of rows
+	int getRows();
+
+	//Returns the number of columns 
+	int getColumns();
+
+	//Returns the total number of cells in grid
+	int getTotalCells();
 	
 	//Function to switch computation from CPU <-> GPU
 	void toggleComputation();

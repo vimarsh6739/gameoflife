@@ -1,4 +1,3 @@
-
 # Makefile to build game
 
 CC= gcc

@@ -184,7 +184,7 @@ bool GoL::getInitialState(std::string filename)
 	file>>_m>>_n;
 	file>>isCpuOrGpu;
 	
-	arr=(int*)malloc(m*n*sizeof(int));
+	arr=(int*)malloc(_m*_n*sizeof(int));
 	
 	for(int i=0;i<_m;++i)
 	{
@@ -356,6 +356,24 @@ float* GoL::getStateColours()
 	}
 	
 	return state_color;
+}
+
+//Return the total number of rows
+int GoL::getRows()
+{
+	return this->rows;
+}
+
+//Return the total number of columns
+int GoL::getColumns()
+{
+	return this->columns;
+}
+
+//Return the total number of cells
+int GoL::getTotalCells()
+{
+	return this->N;
 }
 
 // A set of helper and checker functions

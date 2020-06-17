@@ -402,9 +402,9 @@ void DisplayEngine::initializeParameters()
 		game_object->getInitialState(config_file);
 
 		//Set grid parameters skipped in constructor
-		this->rows = game_object->rows;
-		this->columns = game_object->columns;
-		this->N = game_object->N;
+		this->rows = game_object->getRows();
+		this->columns = game_object->getColumns();
+		this->N = game_object->getTotalCells();
 	}
 
 	std::cout<<"Finished initializing the grid\n";
