@@ -7,19 +7,31 @@ NVCC := nvcc
 CFLAGS= -std=c++11 -g -O3
 LIBS= -lGL -lGLU -lglut
 
-OBJS= GoL.o DisplayEngine.o main.o
+DSPOBJS= GoL.o DisplayEngine.o main.o
+DSPTARGET= bin
 
-TARGET= bin
+BENOBJS= GoL.o Benchmark.o
+BENTARGET= bencher
 
 # Specifying build rules
 
-all : $(TARGET)
+all : $(DSPTARGET) $(BENTARGET)
 
-$(TARGET) : $(OBJS)
-	$(NVCC) $^ -o $(TARGET) $(CFLAGS) $(LIBS)
+run : $(DSPTARGET)
+
+test : $(BENTARGET)
+
+$(BENTARGET) : $(BENOBJS)
+	$(NVCC) $^ -o $(BENTARGET) $(CFLAGS)
+
+$(DSPTARGET) : $(DSPOBJS)
+	$(NVCC) $^ -o $(DSPTARGET) $(CFLAGS) $(LIBS)
+
+Benchmark.o : Benchmark.cu
+	$(NVCC) -c $< $(CFLAGS)
 
 GoL.o : GoL.cu
-	$(NVCC) -c $< $(CFLAGS) $(LIBS)
+	$(NVCC) -c $< $(CFLAGS)
 
 DisplayEngine.o : DisplayEngine.cu
 	$(NVCC) -c $< $(CFLAGS) $(LIBS)
@@ -28,4 +40,4 @@ main.o : main.cu
 	$(NVCC) -c $< $(CFLAGS) $(LIBS)
 
 clean : 
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(DSPTARGET) $(DSPOBJS) $(BENTARGET) $(BENOBJS)

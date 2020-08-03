@@ -1,4 +1,8 @@
-#include "GoL_backend.h"
+#include "GoL.h"
+
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 class Generator
 {
