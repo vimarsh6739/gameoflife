@@ -68,7 +68,7 @@ int main(int argc, char* argv[]){
 
     beginCPU = clock();
     
-    GoL cpu_object = new GoL(rows, columns, false);
+    GoL* cpu_object = new GoL(rows, columns, false);
     cpu_object->setRandomInitialState();
     
     for(auto i=0;i < maxgeneration ; ++i)
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]){
 
     beginGPU = clock();
 
-    GoL gpu_object = new GoL(rows, columns, true);
+    GoL* gpu_object = new GoL(rows, columns, true);
     gpu_object->setRandomInitialState();
 
     for(auto i=0;i<maxgeneration;++i)
