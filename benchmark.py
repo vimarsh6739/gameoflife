@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 print("BEGINNING BENCHMARK")
 
 ## Compile target using make
-proc = subprocess.Popen("make", "run")
+proc = subprocess.Popen(["make", "test"])
 proc.wait()
 
 ## Define max number of generations
@@ -28,7 +28,7 @@ print("ESTIMATING EXECUTION TIME")
 ## Start calculation for configurations
 for i in range(100):
 
-    proc = subprocess.Popen("./bencher","-r",str(rows),"-c",str(columns),"-g",str(maxgen))
+    proc = subprocess.Popen(["./bencher","-r",str(rows),"-c",str(columns),"-g",str(maxgen)])
     proc.wait()
 
     # Read O/P
@@ -58,7 +58,7 @@ figname = "Benchmark_plot_gol"
 plt.savefig(figname,dpi=300)
 
 ## Clean targets
-proc = subprocess.Popen("make", "clean")
+proc = subprocess.Popen(["make", "clean"])
 proc.wait()
 
 print("END")
