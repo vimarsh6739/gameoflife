@@ -1,5 +1,5 @@
 # gameoflife
-GPU Programming Project to simulate and render Conway's Game of Life in Cuda C++ and OpenGL
+CS6023(GPU Programming) Project to simulate and render Conway's Game of Life in Cuda C++ and OpenGL
 
 To compile the project with display, do
 `make run`
