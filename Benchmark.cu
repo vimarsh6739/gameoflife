@@ -1,25 +1,78 @@
 #include "GoL.h"
-
 #include <iostream> 
 #include <fstream>
 #include <iomanip>
 
-#include <time.h>
-#include <sys/time.h>
-#define USECPSEC 1000000ULL
+int max_generations = 1000;
+int n_small = 9;
+int n_large = 20;
 
-unsigned long long dtime_usec(unsigned long long start){
+// Perform a single run 
+void timedRun(int sz, bool small, std::ofstream &myfile, cudaEvent_t start, cudaEvent_t stop){
 
-  timeval tv;
-  gettimeofday(&tv, 0);
-  return ((tv.tv_sec*USECPSEC)+tv.tv_usec)-start;
+    // Set input parameters
+    auto rows = sz*10;
+    auto cols = sz*10;
+    
+    if(!small){
+        rows = sz*100;
+        cols = sz*100;
+
+        std::cout << std::setw(5) << (n_small+sz) ;  
+    }
+    else{
+        std::cout << std::setw(5) << (sz) ; 
+    }
+
+    auto N = (size_t)rows * (size_t)cols;
+    myfile << N << ",";
+
+    std::cout   << std::setw(15) << rows 
+                << std::setw(15) << cols 
+                << std::setw(15) << N << std::flush;
+                
+    /* Time CPU execution */
+    GoL o_c(rows,cols,false);
+
+    cudaEventRecord(start,0);
+
+    o_c.setRandomInitialState();
+    for(auto i=0;i<max_generations;++i){
+        o_c.updateState();
+    }
+
+    cudaEventRecord(stop,0);
+    cudaEventSynchronize(stop);
+    
+    float cpu_time;
+    cudaEventElapsedTime(&cpu_time,start,stop);
+    
+    myfile << cpu_time << ",";
+    std::cout << std::setw(15) << cpu_time << std::flush;
+
+    /* Time GPU execution */
+    GoL o_g(rows,cols,true);
+
+    cudaEventRecord(start,0);
+
+    o_g.setRandomInitialState();
+    for(auto i=0;i<max_generations; ++i){
+        o_g.updateState();
+    }
+
+    cudaEventRecord(stop,0);
+    cudaEventSynchronize(stop);
+    
+    float gpu_time;
+    cudaEventElapsedTime(&gpu_time,start,stop);
+
+    myfile << gpu_time << std::endl;
+    std::cout << std::setw(15) << gpu_time << std::endl;
 }
 
 int main(int argc, char* argv[]){
     
-    // Have a default computation length of 1000 generations
-    int max_generations = 1000;
-    std::string csv_name = "times.csv";
+    std::string csv_name = "times.csv";     // default file for storing results
 
     // Parse cmd line arguments
     for(int i=0;i<argc;++i){
@@ -52,56 +105,33 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
-    myfile      << "Number of Cells, CPU Time(us), GPU Time(us)" << std::endl;
+    myfile << "Number of Cells,CPU Time(ms),GPU Time(ms)" << std::endl;
     
-    std::cout   << std::setw(3) << "Id"
-                << std::setw(5)  << "Rows"
-                << std::setw(5)  << "Cols"
-                << std::setw(12) << "CPU Time(s)"
-                << std::setw(12) << "GPU Time(s)" << std::endl;
-
-    auto rows = 0;
-    auto cols = 0;
+    std::cout   << std::setw(5) << "Id"
+                << std::setw(15) << "n_rows"
+                << std::setw(15) << "n_cols"
+                << std::setw(15) << "n_cells"
+                << std::setw(15) << "CPU Time(ms)"
+                << std::setw(15) << "GPU Time(ms)" 
+                << std::endl;
     
-    for(auto t = 1; t <= 25 ; ++t){
-        
-        rows = t*100;
-        cols = t*100;
-        auto N = (size_t)rows * (size_t)cols;
-        
-        std::cout << std::setw(3) << t << std::setw(5) << rows << std::setw(5) << cols << std::flush;
-        myfile << N << ",";
+    cudaEvent_t start,stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
 
-        /* CPU execution */
-        GoL o_c(rows,cols,false);
-        auto cpu_time = dtime_usec(0);
-
-        o_c.setRandomInitialState();
-        for(auto i=0;i<max_generations;++i){
-            o_c.updateState();
-        }
-
-        cpu_time = dtime_usec(cpu_time);
-
-        std::cout << std::setw(12) << cpu_time/(float)USECPSEC << std::flush;
-        myfile << cpu_time << ",";
-
-        /* GPU execution */
-        GoL o_g(rows,cols,true);
-        auto gpu_time = dtime_usec(0);
-
-        o_g.setRandomInitialState();
-        for(auto i=0;i<max_generations; ++i){
-            o_g.updateState();
-        }
-
-        gpu_time = dtime_usec(gpu_time);
-
-        std::cout << std::setw(12) << gpu_time/(float)USECPSEC << std::endl;
-        myfile << gpu_time << std::endl;
+    // Small random inputs
+    for(auto t = 1; t < 10 ; ++t){
+        timedRun(t,true,myfile,start,stop);
     }
 
-    // save and exit
+    // Big random inputs
+    for(auto t = 1; t <= 20 ; ++t){
+        timedRun(t,false,myfile,start,stop);
+    }
+
+    // teardown
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
     myfile.close();
     
     return 0; 

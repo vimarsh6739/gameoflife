@@ -5,17 +5,15 @@ import matplotlib.pyplot as plt
 
 # Process input
 df = pd.read_csv("times.csv")
-df['CPUTime(ms)'] = df[' CPU Time(us)'] / 1000
-df['GPUTime(ms)'] = df[' GPU Time(us)'] / 1000
-df['speedup'] = df['CPUTime(ms)'] / df['GPUTime(ms)']
+df['speedup'] = df['CPU Time(ms)'] / df['GPU Time(ms)']
 
 # Create plot arrays
 x = df.iloc[:,0] / 10000
-y1 = df['CPUTime(ms)']
-y2 = df['GPUTime(ms)']
+y1 = df['CPU Time(ms)']
+y2 = df['GPU Time(ms)']
 y3 = df['speedup']
 
-print('Generating CPU vs GPU svg plot')
+print('Generating CPU vs GPU plot')
 
 # Plot CPU vs GPU times
 fig = plt.figure()
@@ -25,7 +23,7 @@ plt.semilogy(x,y2,color='blue',label='GPU')
 plt.xlabel('No of cells (in ten thousands)')
 plt.ylabel('Compute Time(ms)')
 plt.legend()
-plt.savefig('assets/ComputeTime.svg',format='svg',dpi=1200)
+plt.savefig('assets/ComputeTime.png',format='png',dpi=1200)
 
 print('Generating speedup plot')
 
@@ -35,4 +33,4 @@ plt.title('GPU speedup vs No of Cells')
 plt.semilogx(x,y3,color='green')
 plt.xlabel('No of cells (in ten thousands)')
 plt.ylabel('Speedup')
-plt.savefig('assets/Speedup.svg',format='svg',dpi=1200)
+plt.savefig('assets/Speedup.png',format='png',dpi=1200)
