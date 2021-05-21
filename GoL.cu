@@ -128,6 +128,20 @@ GoL::GoL(bool isGpu, std::string fname)
 	this->updateIter = 0;
 }
 
+GoL::~GoL(){
+	// Free host pointers
+	free(curr_state);
+	free(next_state);
+	free(state_color);
+
+	// Free device pointers if allocated
+	if(isGpu){
+		cudaFree(curr_state_dev);
+		cudaFree(next_state_dev);
+		cudaFree(state_color_dev);
+	}
+}
+
 //Initialize the state matrix to a random initial state 
 void GoL::setRandomInitialState()
 {

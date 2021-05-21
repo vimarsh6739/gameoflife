@@ -17,16 +17,20 @@ std::string Generator::genFileInput(int m,int n,bool ifCpuOrGpu)
     {
         filename="cpu";
     }
+
     filename+=std::to_string(test_number);
     test_number++;
     std::vector<std::vector<int>> arr(m,std::vector<int>(n));
     srand(time(NULL));
+    
     for(int i=0;i<m;++i)
         for(int j=0;j<n;++j)
             arr[i][j]=rand()%2;
-    ofstream myfile;
+    
+    std::ofstream myfile;
     myfile.open(filename);
     myfile<<m<<" "<<n<<"\n"<<ifCpuOrGpu<<"\n";
+    
     for(int i=0;i<m;++i)
     {
         for(int j=0;j<n;++j)
@@ -34,10 +38,11 @@ std::string Generator::genFileInput(int m,int n,bool ifCpuOrGpu)
         myfile<<"\n";
     }
     myfile.close();
+
     return filename;
 }
 
-std::string Generator::switchComputationFile(std::string filename)
+std::string Generator::switchedComputationFile(std::string filename)
 {
     std::string outstring=filename;
     int m,n;
@@ -46,7 +51,8 @@ std::string Generator::switchComputationFile(std::string filename)
         outstring[0]='g';
     else
         outstring[0]='c';
-    ifstream fin;
+    
+    std::ifstream fin;
     fin.open(filename);
     fin>>m>>n>>ifCpuOrGpu;
     ifCpuOrGpu=!ifCpuOrGpu;
@@ -55,7 +61,8 @@ std::string Generator::switchComputationFile(std::string filename)
         for(int j=0;j<n;++j)
             fin>>arr[i][j];
     fin.close();
-    ofstream myfile;
+
+    std::ofstream myfile;
     myfile.open(outstring);
     myfile<<m<<" "<<n<<"\n"<<ifCpuOrGpu<<"\n";
     for(int i=0;i<m;++i)

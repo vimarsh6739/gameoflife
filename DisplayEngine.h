@@ -8,6 +8,7 @@
 #ifdef _WIN32
   #include <windows.h>
 #endif
+
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
@@ -35,66 +36,43 @@ private:
 	
 	static DisplayEngine* game; // Stores this pointer for game
 	
-	//Environment variables for grid game---------------
+	/* Environment variables for grid game */
 	
-		int windowWidth; 	 
-		int windowHeight; 	
-		
-		//Number of cells
-		int N;
+	bool isRandInit;			//Flag to indicate if config file has been provided
+	std::string config_file;	//File which contains config details
+	
+	int windowWidth;			// Dynamic width of display window 	 
+	int windowHeight; 			// Dynamic height of display window
+	
+	int N;						//Number of cells
+	int rows; 					//Number of rows in the grid
+	int columns; 				//Number of columns in the grid
 
-		//Number of rows in the grid
-		int rows; 		
-		
-		//Number of columns in the grid
-		int columns; 	
+	
+	bool pause;					//Pause animation flag
+	bool isGpu;					//Flag to check area of computation(CPU or GPU)
 
-		//Pause animation
-		bool pause;
+	float* state_color;			// Color encoded state variable(in host mem.)
 
-		//Flag to indicate if config file has been provided
-		bool isRandInit;
+	GLuint texture_map;			// Texture buffer id
 
-		//Flag to check if computation is on CPU or GPU
-		bool isGpu;
+	/* Benchmarking Variables */
 
-		//File which contains config details
-		std::string config_file;
+	int FPS_DEBUG; 				// Debugging frame rate(maually set in debug mode)
 
-		//Color encoded state variable(in host mem.)
-		float* state_color;
-		
-		//Texture buffer id
-		GLuint texture_map;
-	// Benchmarking Variables---------------
+	double totalTime;			// Total time taken to render all frames in millis
+	double avgFrameTime; 		// Average time taken to draw 1 frame
+	double FPS;					// Current avg frame rate
 
-		//Debugging frame rate(maually set in debug mode)
-		int FPS_DEBUG; 	
+	clock_t startTick;			// Start time of program
 
-		//Total time taken to render all frames in millis
-		double totalTime;
+	clock_t beginDrawTick;		// Begin and end ticks 
+	clock_t endDrawTick;		// for drawing image
+	clock_t deltaTime;			//Actual time taken to draw current frame
 
-		//Average time taken to draw 1 frame
-		double avgFrameTime; 
+	int frameCount;				//No of frames drawn in 1 sec	
 
-		//Current avg frame rate
-		double FPS;		
-
-		//Start time of program
-		clock_t startTick;	
-
-		// Begin and end ticks for drawing image
-		clock_t beginDrawTick;	
-		clock_t endDrawTick;	
-
-		//Actual time taken to draw current frame
-		clock_t deltaTime;	
-
-		//No of frames drawn in 1 sec
-		int frameCount;		
-
-		//Total number of updates in the game so far
-		int generationCount;
+	int generationCount;		//Total number of updates in the game so far
 
 	//Object of the game class that contains the state variables 
 	//and the update and initialization functions and upddates the grid 

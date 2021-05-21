@@ -222,21 +222,19 @@ void DisplayEngine::updateStats()
 
 	//Dynamic FPS
 	FPS = 1000.0 * frameCount/totalTime;
-
-	// std::cout<<FPS<<"\n";
 }
 
 //Print the text in msg starting at coordinates (x,y)
 void DisplayEngine::windowPrint(int x, int y, const char* msg)
 {
-	//Print screen info in green color
+	//Print screen info iin green color
 	glColor3f(0.0,1.0,0.0);
 	glRasterPos2f(x,y);
 
 	int len = (int)strlen(msg);
 	for(int i=0;i<len;++i)
 	{
-		glutBitmapCharacter(GLUT_BITMAP_8_BY_13,msg[i]);
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,msg[i]);
 	}
 
 	//Switch back to white for further rendering
@@ -247,18 +245,12 @@ void DisplayEngine::windowPrint(int x, int y, const char* msg)
 //other parameters in the display window itself
 void DisplayEngine::displayStats()
 {
-	//Pointer to constat string
-	const char* ptr;
-
 	//Print the message to be printed onto screen in ss
-	std::stringstream ss;
+	char info[50];
+	sprintf(info, "Generation = %d, FPS = %d, CUDA = %s",generationCount,(int)(FPS), isGpu ? "true":"false");
 	
-	ss<<"FPS = "<<FPS<<"\n";
-	ss<<"GPU compute = "<<isGpu<<"\n";
-	ptr = (ss.str()).c_str();
-
 	//call to print message byte by byte to window
-	windowPrint(0,0,ptr);
+	windowPrint(1,1,info);
 }
 
 //Draw from texture map
@@ -426,7 +418,7 @@ void DisplayEngine::start(int argc, char* argv[])
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 	glutInitWindowSize(windowWidth, windowHeight);
 	glutInitWindowPosition(80,80);
-
+	
 	//Name the window
 	glutCreateWindow("Conway's Game of Life");
 
@@ -448,7 +440,7 @@ void DisplayEngine::start(int argc, char* argv[])
 
 	//Setup texture/state and game object before initial display
 	initializeParameters();
-
+	
 	//Start render loop
 	glutMainLoop();
 }

@@ -1,4 +1,4 @@
-# Makefile to build game
+# Specify Variables
 
 CC= gcc
 CXX= g++
@@ -8,18 +8,18 @@ CFLAGS= -std=c++11 -g -O3
 LIBS= -lGL -lGLU -lglut
 
 DSPOBJS= GoL.o DisplayEngine.o main.o
-DSPTARGET= bin
+DSPTARGET= gui
 
 BENOBJS= GoL.o Benchmark.o
-BENTARGET= bencher
+BENTARGET= bench
 
 # Specifying build rules
 
 all : $(DSPTARGET) $(BENTARGET)
 
-run : $(DSPTARGET)
+display : $(DSPTARGET)
 
-test : $(BENTARGET)
+benchmark : $(BENTARGET)
 
 $(BENTARGET) : $(BENOBJS)
 	$(NVCC) $^ -o $(BENTARGET) $(CFLAGS)

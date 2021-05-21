@@ -7,6 +7,9 @@
 #include <cstdlib>
 #include <ctime>
 #include <cuda.h>
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+#include "device_types.h"
 
 #ifndef GOL_H
 #define GOL_H
@@ -54,6 +57,9 @@ class GoL
 	
 	GoL();
 
+	// Destructor for both host and device memory
+	~GoL();
+	
 	//Constructor for implicit computation only on the CPU
 	GoL(int rows, int columns);
 	
